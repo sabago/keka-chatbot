@@ -19,6 +19,10 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
+// Trust proxy - Required for Railway/reverse proxy deployments
+// This allows Express to read X-Forwarded-* headers correctly
+app.set('trust proxy', true);
+
 // Security: Helmet with CSP
 app.use(helmet({
   contentSecurityPolicy: {
