@@ -1,0 +1,23 @@
+{
+	"name": "keka-chatbot",
+	"version": "1.0.0",
+	"description": "HIPAA-safe support chatbot for Keka Rehab Services",
+	"private": true,
+	"workspaces": [
+		"frontend",
+		"backend"
+	],
+	"scripts": {
+		"dev": "concurrently \"npm run dev -w backend\" \"npm run dev -w frontend\"",
+		"build": "npm run build -w backend && npm run build -w frontend",
+		"start": "npm run start -w backend",
+		"crawl": "tsx scripts/crawl-keka.ts"
+	},
+	"devDependencies": {
+		"concurrently": "^8.2.2",
+		"tsx": "^4.7.0"
+	},
+	"dependencies": {
+		"@tailwindcss/postcss": "^4.1.16"
+	}
+}
