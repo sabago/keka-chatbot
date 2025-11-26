@@ -11,7 +11,7 @@ import {
 } from "../utils/analytics";
 
 export default function ChatWidget() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const {
     messages,
     isLoading,
