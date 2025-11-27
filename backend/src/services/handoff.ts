@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { HandoffRequest } from '../types/schema';
 import { logger } from '../utils/logger';
 import { sendContactNotification } from './email';
