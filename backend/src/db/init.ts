@@ -106,16 +106,30 @@ export async function initializeDatabase(): Promise<void> {
     }
 
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
+
     logger.error('database_initialization_failed', {
-      error: String(error),
-      stack: error instanceof Error ? error.stack : undefined,
+      error: errorMessage,
+      stack: errorStack,
+      database_url_set: !!process.env.DATABASE_URL,
+      node_env: process.env.NODE_ENV,
     });
+
+    // Log to console for Railway logs visibility
+    console.error('❌ Database initialization failed:');
+    console.error('Error:', errorMessage);
+    if (errorStack) {
+      console.error('Stack:', errorStack);
+    }
 
     // Don't throw in production - allow server to start even if DB fails
     // This allows Railway deployment to succeed and we can debug from logs
     if (process.env.NODE_ENV === 'production') {
+      console.warn('⚠️  Server starting without database - check Railway logs for details');
       logger.warn('database_initialization_skipped', {
         message: 'Server starting without database - check DATABASE_URL',
+        error_details: errorMessage,
       });
     } else {
       throw error;
