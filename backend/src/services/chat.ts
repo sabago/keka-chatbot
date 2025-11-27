@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { BotResponse, ChatRequest, containsPHI, Button } from '../types/schema';
 import { getHomeScreen, getCategoryButtons, getFAQAnswer, getResolutionButtons } from './faq';
 import { generateRetrievalResponse } from './retrieve';
