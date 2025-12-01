@@ -73,7 +73,20 @@ export function useChat() {
       setIsLoading(true);
 
       try {
-        const response = await sendChatMessage(message, sessionId, sessionData);
+        // Prepare chat transcript for backend (convert messages to simple format)
+        const chatTranscript = messages.map((msg) => ({
+          sender: msg.sender,
+          text: msg.text,
+          timestamp: msg.timestamp.toISOString(),
+        }));
+
+        // Include transcript in session_data
+        const updatedSessionData = {
+          ...sessionData,
+          chat_transcript: chatTranscript,
+        };
+
+        const response = await sendChatMessage(message, sessionId, updatedSessionData);
 
         // Add bot response
         const botMessage: ChatMessage = {

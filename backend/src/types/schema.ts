@@ -16,7 +16,7 @@ export const BotResponseSchema = z.object({
   text: z.string().max(600),
   buttons: z.array(ButtonSchema).max(12).optional(),
   links: z.array(LinkCardSchema).max(5).optional(),
-  input_type: z.enum(['text', 'email', 'phone', 'textarea', 'none']).optional(),
+  input_type: z.enum(['text', 'email', 'phone', 'textarea', 'date', 'none']).optional(),
   input_label: z.string().max(100).optional(),
   input_placeholder: z.string().max(100).optional(),
   next_state: z.enum([
@@ -69,15 +69,25 @@ export const ChatRequestSchema = z.object({
 
 export type ChatRequest = z.infer<typeof ChatRequestSchema>;
 
+// Chat message schema (for transcript)
+export const ChatMessageSchema = z.object({
+  sender: z.enum(['user', 'bot']),
+  text: z.string().max(1000),
+  timestamp: z.string(),
+});
+
+export type ChatMessage = z.infer<typeof ChatMessageSchema>;
+
 // Handoff request
 export const HandoffRequestSchema = z.object({
   // Service type discriminator
-  service_type: z.enum(['patient_intake', 'accreditation_consulting', 'staffing_employment']),
+  service_type: z.enum(['patient_intake', 'accreditation_consulting', 'staffing_employment', 'general_inquiry']),
 
   // Common fields (all flows)
   contact_name: z.string().max(100).optional(),
   contact_type: z.enum(['phone', 'email']),
   contact_value: z.string().max(100),
+  chat_transcript: z.array(ChatMessageSchema).max(100).optional(), // Full conversation history
 
   // Patient intake fields
   // Section 1: Client Information
@@ -145,6 +155,60 @@ export const HandoffRequestSchema = z.object({
   consent_given: z.boolean().optional(),
 
   session_id: z.string().uuid(),
+}).refine((data) => {
+  // Validate contact_value based on contact_type
+  if (data.contact_type === 'email') {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(data.contact_value);
+  }
+  if (data.contact_type === 'phone') {
+    // Simple validation: Check for exactly 10 digits (US format)
+    const digitsOnly = data.contact_value.replace(/\D/g, '');
+    return digitsOnly.length === 10;
+  }
+  return true;
+}, {
+  message: 'Invalid contact value format',
+  path: ['contact_value'],
+}).refine((data) => {
+  // Validate date_of_birth format and range if provided
+  if (data.date_of_birth) {
+    // Accept both M/D/YYYY and MM/DD/YYYY formats
+    const dateRegex = /^(0?[1-9]|1[0-2])\/(0?[1-9]|[12][0-9]|3[01])\/(\d{4})$/;
+    if (!dateRegex.test(data.date_of_birth)) {
+      return false;
+    }
+    // Validate date is within reasonable range (1900-current year + 1)
+    const [, , year] = data.date_of_birth.split('/').map(Number);
+    const currentYear = new Date().getFullYear();
+    return year >= 1900 && year <= currentYear + 1;
+  }
+  return true;
+}, {
+  message: 'Invalid date of birth format (must be M/D/YYYY or MM/DD/YYYY) or out of range (1900-2025)',
+  path: ['date_of_birth'],
+}).refine((data) => {
+  // Validate emergency_contact_phone format if provided
+  if (data.emergency_contact_phone) {
+    // Simple validation: Check for exactly 10 digits (US format)
+    const digitsOnly = data.emergency_contact_phone.replace(/\D/g, '');
+    return digitsOnly.length === 10;
+  }
+  return true;
+}, {
+  message: 'Invalid emergency contact phone format',
+  path: ['emergency_contact_phone'],
+}).refine((data) => {
+  // Validate preferred_start_date format if provided
+  if (data.preferred_start_date) {
+    // Accept both M/D/YYYY and MM/DD/YYYY formats
+    const dateRegex = /^(0?[1-9]|1[0-2])\/(0?[1-9]|[12][0-9]|3[01])\/(\d{4})$/;
+    return dateRegex.test(data.preferred_start_date);
+  }
+  return true;
+}, {
+  message: 'Invalid preferred start date format (must be M/D/YYYY or MM/DD/YYYY)',
+  path: ['preferred_start_date'],
 });
 
 export type HandoffRequest = z.infer<typeof HandoffRequestSchema>;

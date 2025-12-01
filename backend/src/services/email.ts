@@ -28,11 +28,18 @@ if (!isDevelopment) {
   }
 }
 
+interface ChatMessage {
+  sender: 'user' | 'bot';
+  text: string;
+  timestamp: string;
+}
+
 interface ContactNotification {
-  serviceType: 'patient_intake' | 'accreditation_consulting' | 'staffing_employment';
+  serviceType: 'patient_intake' | 'accreditation_consulting' | 'staffing_employment' | 'general_inquiry';
   contactName?: string;
   contactType: 'email' | 'phone';
   contactValue: string;
+  chatTranscript?: ChatMessage[]; // Full conversation history
 
   // Patient intake fields - Section 1: Client Information
   dateOfBirth?: string;
@@ -107,6 +114,7 @@ function generateEmailText(notification: ContactNotification): string {
     'patient_intake': 'Patient / Client Intake',
     'accreditation_consulting': 'Accreditation & Consulting Support',
     'staffing_employment': 'Staffing & Employment',
+    'general_inquiry': 'General Contact Request',
   };
   const serviceTypeLabel = serviceTypeMap[notification.serviceType] || 'General Inquiry';
 
@@ -117,58 +125,89 @@ ${notification.contactName ? `Contact Name: ${notification.contactName}\n` : ''}
 ${notification.contactType === 'email' ? 'Email' : 'Phone'}: ${notification.contactValue}
 `;
 
-  // Add comprehensive patient intake details
+  // Add chat transcript if available
+  if (notification.chatTranscript && notification.chatTranscript.length > 0) {
+    textBody += '\n=== CHAT CONVERSATION ===\n';
+    notification.chatTranscript.forEach((msg) => {
+      const time = new Date(msg.timestamp).toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit'
+      });
+      textBody += `[${time}] ${msg.sender === 'user' ? 'User' : 'Bot'}: ${msg.text}\n`;
+    });
+  }
+
+  // Add comprehensive patient intake details (only if data exists)
   if (notification.serviceType === 'patient_intake') {
-    textBody += '\n=== CLIENT INFORMATION ===\n';
-    if (notification.dateOfBirth) textBody += `Date of Birth: ${notification.dateOfBirth}\n`;
-    if (notification.gender) {
-      const genderMap: Record<string, string> = { male: 'Male', female: 'Female', other: 'Other', prefer_not_to_say: 'Prefer not to say' };
-      textBody += `Gender: ${genderMap[notification.gender] || notification.gender}\n`;
-    }
-    if (notification.addressStreet || notification.addressCity) {
-      textBody += `Address: ${notification.addressStreet || ''}, ${notification.addressCity || ''}, ${notification.addressState || ''} ${notification.addressZip || ''}\n`;
-    }
-
-    textBody += '\n=== EMERGENCY CONTACT ===\n';
-    if (notification.emergencyContactName) textBody += `Name: ${notification.emergencyContactName}\n`;
-    if (notification.emergencyContactRelationship) textBody += `Relationship: ${notification.emergencyContactRelationship}\n`;
-    if (notification.emergencyContactPhone) textBody += `Phone: ${notification.emergencyContactPhone}\n`;
-
-    textBody += '\n=== MEDICAL INFORMATION ===\n';
-    if (notification.primaryDiagnosis) textBody += `Primary Diagnosis: ${notification.primaryDiagnosis}\n`;
-    if (notification.secondaryConditions) textBody += `Secondary Conditions: ${notification.secondaryConditions}\n`;
-    if (notification.allergies) textBody += `Allergies: ${notification.allergies}\n`;
-    if (notification.physicianName) textBody += `Physician: ${notification.physicianName}\n`;
-    if (notification.physicianContact) textBody += `Physician Contact: ${notification.physicianContact}\n`;
-    if (notification.assistiveDevices && notification.assistiveDevices.length > 0) {
-      textBody += `Assistive Devices: ${notification.assistiveDevices.join(', ')}\n`;
+    // Only add sections that have actual data
+    if (notification.dateOfBirth || notification.gender || notification.addressStreet || notification.addressCity) {
+      textBody += '\n=== CLIENT INFORMATION ===\n';
+      if (notification.dateOfBirth) textBody += `Date of Birth: ${notification.dateOfBirth}\n`;
+      if (notification.gender) {
+        const genderMap: Record<string, string> = { male: 'Male', female: 'Female', other: 'Other', prefer_not_to_say: 'Prefer not to say' };
+        textBody += `Gender: ${genderMap[notification.gender] || notification.gender}\n`;
+      }
+      if (notification.addressStreet || notification.addressCity) {
+        textBody += `Address: ${notification.addressStreet || ''}, ${notification.addressCity || ''}, ${notification.addressState || ''} ${notification.addressZip || ''}\n`;
+      }
     }
 
-    textBody += '\n=== SERVICES REQUESTED ===\n';
+    if (notification.emergencyContactName || notification.emergencyContactPhone) {
+      textBody += '\n=== EMERGENCY CONTACT ===\n';
+      if (notification.emergencyContactName) textBody += `Name: ${notification.emergencyContactName}\n`;
+      if (notification.emergencyContactRelationship) textBody += `Relationship: ${notification.emergencyContactRelationship}\n`;
+      if (notification.emergencyContactPhone) textBody += `Phone: ${notification.emergencyContactPhone}\n`;
+    }
+
+    if (notification.primaryDiagnosis || notification.secondaryConditions || notification.allergies || notification.physicianName || (notification.assistiveDevices && notification.assistiveDevices.length > 0)) {
+      textBody += '\n=== MEDICAL INFORMATION ===\n';
+      if (notification.primaryDiagnosis) textBody += `Primary Diagnosis: ${notification.primaryDiagnosis}\n`;
+      if (notification.secondaryConditions) textBody += `Secondary Conditions: ${notification.secondaryConditions}\n`;
+      if (notification.allergies) textBody += `Allergies: ${notification.allergies}\n`;
+      if (notification.physicianName) textBody += `Physician: ${notification.physicianName}\n`;
+      if (notification.physicianContact) textBody += `Physician Contact: ${notification.physicianContact}\n`;
+      if (notification.assistiveDevices && notification.assistiveDevices.length > 0) {
+        textBody += `Assistive Devices: ${notification.assistiveDevices.join(', ')}\n`;
+      }
+    }
+
     if (notification.servicesRequested && notification.servicesRequested.length > 0) {
+      textBody += '\n=== SERVICES REQUESTED ===\n';
       textBody += `Services: ${notification.servicesRequested.join(', ')}\n`;
     }
 
-    textBody += '\n=== MOBILITY ASSESSMENT ===\n';
-    if (notification.canWalkIndependently) textBody += `Can Walk Independently: ${notification.canWalkIndependently}\n`;
-    if (notification.assistanceLevel) textBody += `Assistance Level: ${notification.assistanceLevel}\n`;
-    if (notification.fallHistory) textBody += `Fall History (6 months): ${notification.fallHistory}\n`;
+    if (notification.canWalkIndependently || notification.assistanceLevel || notification.fallHistory) {
+      textBody += '\n=== MOBILITY ASSESSMENT ===\n';
+      if (notification.canWalkIndependently) textBody += `Can Walk Independently: ${notification.canWalkIndependently}\n`;
+      if (notification.assistanceLevel) textBody += `Assistance Level: ${notification.assistanceLevel}\n`;
+      if (notification.fallHistory) textBody += `Fall History (6 months): ${notification.fallHistory}\n`;
+    }
 
-    textBody += '\n=== REFERRAL SOURCE ===\n';
-    if (notification.referralSource) textBody += `Referral Source: ${notification.referralSource}\n`;
-    if (notification.referralAgency) textBody += `Referral Agency: ${notification.referralAgency}\n`;
-    if (notification.referralContact) textBody += `Referral Contact: ${notification.referralContact}\n`;
+    if (notification.referralSource || notification.referralContact) {
+      textBody += '\n=== REFERRAL SOURCE ===\n';
+      if (notification.referralSource) textBody += `Referral Source: ${notification.referralSource}\n`;
+      if (notification.referralAgency) textBody += `Referral Agency: ${notification.referralAgency}\n`;
+      if (notification.referralContact) textBody += `Referral Contact: ${notification.referralContact}\n`;
+    }
 
-    textBody += '\n=== INSURANCE & PAYMENT ===\n';
-    if (notification.primaryInsurance) textBody += `Primary Insurance: ${notification.primaryInsurance}\n`;
-    if (notification.insuranceMemberId) textBody += `Member ID: ${notification.insuranceMemberId}\n`;
-    if (notification.secondaryInsurance) textBody += `Secondary Insurance: ${notification.secondaryInsurance}\n`;
-    if (notification.responsibleParty) textBody += `Responsible Party: ${notification.responsibleParty}\n`;
+    if (notification.primaryInsurance || notification.secondaryInsurance || notification.responsibleParty) {
+      textBody += '\n=== INSURANCE & PAYMENT ===\n';
+      if (notification.primaryInsurance) textBody += `Primary Insurance: ${notification.primaryInsurance}\n`;
+      if (notification.insuranceMemberId) textBody += `Member ID: ${notification.insuranceMemberId}\n`;
+      if (notification.secondaryInsurance) textBody += `Secondary Insurance: ${notification.secondaryInsurance}\n`;
+      if (notification.responsibleParty) textBody += `Responsible Party: ${notification.responsibleParty}\n`;
+    }
 
-    textBody += '\n=== REQUEST DETAILS ===\n';
-    textBody += `Care For: ${notification.careFor === 'self' ? 'Themselves' : 'A Loved One'}\n`;
-    const settingMap: Record<string, string> = { in_home: 'In-Home Care', adult_day_health: 'Adult Day Health', clinic_visit: 'Clinic Visit' };
-    textBody += `Care Setting: ${notification.careSetting ? settingMap[notification.careSetting] : 'Not specified'}\n`;
+    if (notification.careFor || notification.careSetting) {
+      textBody += '\n=== REQUEST DETAILS ===\n';
+      if (notification.careFor) {
+        textBody += `Care For: ${notification.careFor === 'self' ? 'Themselves' : 'A Loved One'}\n`;
+      }
+      if (notification.careSetting) {
+        const settingMap: Record<string, string> = { in_home: 'In-Home Care', adult_day_health: 'Adult Day Health', clinic_visit: 'Clinic Visit' };
+        textBody += `Care Setting: ${settingMap[notification.careSetting]}\n`;
+      }
+    }
   } else if (notification.serviceType === 'accreditation_consulting') {
     textBody += '\n=== BUSINESS DETAILS ===\n';
     textBody += `Business Name: ${notification.businessName || 'Not provided'}\n`;
@@ -198,6 +237,41 @@ ${notification.contactType === 'email' ? 'Email' : 'Phone'}: ${notification.cont
   return textBody;
 }
 
+// Helper function to generate chat transcript HTML
+function generateChatTranscriptHTML(transcript?: ChatMessage[]): string {
+  if (!transcript || transcript.length === 0) {
+    return '';
+  }
+
+  const messagesHTML = transcript
+    .map((msg) => {
+      const senderLabel = msg.sender === 'user' ? 'User' : 'Keka Bot';
+      const senderColor = msg.sender === 'user' ? '#2196F3' : '#666';
+      const bgColor = msg.sender === 'user' ? '#E3F2FD' : '#F5F5F5';
+      const time = new Date(msg.timestamp).toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit'
+      });
+
+      return `
+        <div style="margin: 10px 0; padding: 12px; background: ${bgColor}; border-radius: 8px; border-left: 4px solid ${senderColor};">
+          <div style="font-weight: 600; color: ${senderColor}; font-size: 12px; margin-bottom: 4px;">
+            ${senderLabel} <span style="color: #999; font-weight: 400; margin-left: 8px;">${time}</span>
+          </div>
+          <div style="color: #333; line-height: 1.5;">${msg.text}</div>
+        </div>
+      `;
+    })
+    .join('');
+
+  return `
+    <h3 style="color: #27A9E2; margin-top: 20px; margin-bottom: 15px;">💬 Chat Conversation</h3>
+    <div style="background: #FAFAFA; padding: 15px; border-radius: 8px; max-height: 500px; overflow-y: auto;">
+      ${messagesHTML}
+    </div>
+  `;
+}
+
 // Generate HTML email template
 function generateEmailHTML(notification: ContactNotification): string {
   // Service type labels
@@ -205,6 +279,7 @@ function generateEmailHTML(notification: ContactNotification): string {
     'patient_intake': '🏥 Patient / Client Intake',
     'accreditation_consulting': '📊 Accreditation & Consulting Support',
     'staffing_employment': '👩🏾‍⚕️ Staffing & Employment',
+    'general_inquiry': '💬 General Contact Request',
   };
   const serviceTypeLabel = serviceTypeMap[notification.serviceType] || 'General Inquiry';
 
@@ -212,13 +287,6 @@ function generateEmailHTML(notification: ContactNotification): string {
   let specificFields = '';
 
   if (notification.serviceType === 'patient_intake') {
-    const careForLabel = notification.careFor === 'self' ? 'Themselves' : 'A Loved One';
-    const settingMap: Record<string, string> = {
-      'in_home': 'In-Home Care',
-      'adult_day_health': 'Adult Day Health',
-      'clinic_visit': 'Clinic Visit',
-    };
-    const settingLabel = notification.careSetting ? settingMap[notification.careSetting] || 'Not specified' : 'Not specified';
     const genderMap: Record<string, string> = {
       'male': 'Male',
       'female': 'Female',
@@ -226,150 +294,179 @@ function generateEmailHTML(notification: ContactNotification): string {
       'prefer_not_to_say': 'Prefer not to say',
     };
 
-    specificFields = `
-    <h3 style="color: #27A9E2; margin-top: 20px; margin-bottom: 15px;">📋 Client Information</h3>
+    // Build sections only if they have data
+    let clientInfoFields = '';
+    if (notification.dateOfBirth || notification.gender || notification.addressStreet || notification.addressCity) {
+      clientInfoFields = `
+        <h3 style="color: #27A9E2; margin-top: 20px; margin-bottom: 15px;">📋 Client Information</h3>
+        ${notification.dateOfBirth ? `
+        <div class="info-row">
+          <div class="label">Date of Birth</div>
+          <div class="value">${notification.dateOfBirth}</div>
+        </div>` : ''}
+        ${notification.gender ? `
+        <div class="info-row">
+          <div class="label">Gender</div>
+          <div class="value">${genderMap[notification.gender] || notification.gender}</div>
+        </div>` : ''}
+        ${notification.addressStreet || notification.addressCity ? `
+        <div class="info-row">
+          <div class="label">Address</div>
+          <div class="value">
+            ${notification.addressStreet || ''}<br>
+            ${notification.addressCity || ''}, ${notification.addressState || ''} ${notification.addressZip || ''}
+          </div>
+        </div>` : ''}
+      `;
+    }
 
-    ${notification.dateOfBirth ? `
-    <div class="info-row">
-      <div class="label">Date of Birth</div>
-      <div class="value">${notification.dateOfBirth}</div>
-    </div>` : ''}
+    let emergencyContactFields = '';
+    if (notification.emergencyContactName || notification.emergencyContactPhone) {
+      emergencyContactFields = `
+        <h3 style="color: #27A9E2; margin-top: 20px; margin-bottom: 15px;">🚨 Emergency Contact</h3>
+        ${notification.emergencyContactName ? `
+        <div class="info-row">
+          <div class="label">Emergency Contact</div>
+          <div class="value">${notification.emergencyContactName}${notification.emergencyContactRelationship ? ` (${notification.emergencyContactRelationship})` : ''}</div>
+        </div>` : ''}
+        ${notification.emergencyContactPhone ? `
+        <div class="info-row">
+          <div class="label">Emergency Phone</div>
+          <div class="value">${notification.emergencyContactPhone}</div>
+        </div>` : ''}
+      `;
+    }
 
-    ${notification.gender ? `
-    <div class="info-row">
-      <div class="label">Gender</div>
-      <div class="value">${genderMap[notification.gender] || notification.gender}</div>
-    </div>` : ''}
+    let medicalInfoFields = '';
+    if (notification.primaryDiagnosis || notification.secondaryConditions || notification.allergies || notification.physicianName || (notification.assistiveDevices && notification.assistiveDevices.length > 0)) {
+      medicalInfoFields = `
+        <h3 style="color: #27A9E2; margin-top: 20px; margin-bottom: 15px;">🏥 Medical Information</h3>
+        ${notification.primaryDiagnosis ? `
+        <div class="info-row">
+          <div class="label">Primary Diagnosis</div>
+          <div class="value">${notification.primaryDiagnosis}</div>
+        </div>` : ''}
+        ${notification.secondaryConditions ? `
+        <div class="info-row">
+          <div class="label">Secondary Conditions</div>
+          <div class="value">${notification.secondaryConditions}</div>
+        </div>` : ''}
+        ${notification.allergies ? `
+        <div class="info-row">
+          <div class="label">Allergies</div>
+          <div class="value">${notification.allergies}</div>
+        </div>` : ''}
+        ${notification.physicianName ? `
+        <div class="info-row">
+          <div class="label">Physician</div>
+          <div class="value">${notification.physicianName}${notification.physicianContact ? ` (${notification.physicianContact})` : ''}</div>
+        </div>` : ''}
+        ${notification.assistiveDevices && notification.assistiveDevices.length > 0 ? `
+        <div class="info-row">
+          <div class="label">Assistive Devices</div>
+          <div class="value">${notification.assistiveDevices.join(', ')}</div>
+        </div>` : ''}
+      `;
+    }
 
-    ${notification.addressStreet || notification.addressCity ? `
-    <div class="info-row">
-      <div class="label">Address</div>
-      <div class="value">
-        ${notification.addressStreet || ''}<br>
-        ${notification.addressCity || ''}, ${notification.addressState || ''} ${notification.addressZip || ''}
-      </div>
-    </div>` : ''}
+    let servicesFields = '';
+    if (notification.servicesRequested && notification.servicesRequested.length > 0) {
+      servicesFields = `
+        <h3 style="color: #27A9E2; margin-top: 20px; margin-bottom: 15px;">💉 Services Requested</h3>
+        <div class="info-row">
+          <div class="label">Requested Services</div>
+          <div class="value">${notification.servicesRequested.join(', ')}</div>
+        </div>
+      `;
+    }
 
-    <h3 style="color: #27A9E2; margin-top: 20px; margin-bottom: 15px;">🚨 Emergency Contact</h3>
+    let mobilityFields = '';
+    if (notification.canWalkIndependently || notification.assistanceLevel || notification.fallHistory) {
+      mobilityFields = `
+        <h3 style="color: #27A9E2; margin-top: 20px; margin-bottom: 15px;">🚶 Mobility Assessment</h3>
+        ${notification.canWalkIndependently ? `
+        <div class="info-row">
+          <div class="label">Can Walk Independently</div>
+          <div class="value">${notification.canWalkIndependently === 'yes' ? 'Yes' : 'No'}</div>
+        </div>` : ''}
+        ${notification.assistanceLevel ? `
+        <div class="info-row">
+          <div class="label">Assistance Level</div>
+          <div class="value">${notification.assistanceLevel}</div>
+        </div>` : ''}
+        ${notification.fallHistory ? `
+        <div class="info-row">
+          <div class="label">Fall History (6 months)</div>
+          <div class="value">${notification.fallHistory === 'yes' ? 'Yes' : 'No'}</div>
+        </div>` : ''}
+      `;
+    }
 
-    ${notification.emergencyContactName ? `
-    <div class="info-row">
-      <div class="label">Emergency Contact</div>
-      <div class="value">${notification.emergencyContactName} (${notification.emergencyContactRelationship || 'Relationship not specified'})</div>
-    </div>` : ''}
+    let referralFields = '';
+    if (notification.referralSource || notification.referralContact) {
+      referralFields = `
+        <h3 style="color: #27A9E2; margin-top: 20px; margin-bottom: 15px;">📞 Referral Source</h3>
+        ${notification.referralSource ? `
+        <div class="info-row">
+          <div class="label">Referral Source</div>
+          <div class="value">${notification.referralSource}${notification.referralAgency ? ` - ${notification.referralAgency}` : ''}</div>
+        </div>` : ''}
+        ${notification.referralContact ? `
+        <div class="info-row">
+          <div class="label">Referral Contact</div>
+          <div class="value">${notification.referralContact}</div>
+        </div>` : ''}
+      `;
+    }
 
-    ${notification.emergencyContactPhone ? `
-    <div class="info-row">
-      <div class="label">Emergency Phone</div>
-      <div class="value">${notification.emergencyContactPhone}</div>
-    </div>` : ''}
+    let insuranceFields = '';
+    if (notification.primaryInsurance || notification.secondaryInsurance || notification.responsibleParty) {
+      insuranceFields = `
+        <h3 style="color: #27A9E2; margin-top: 20px; margin-bottom: 15px;">💳 Insurance & Payment</h3>
+        ${notification.primaryInsurance ? `
+        <div class="info-row">
+          <div class="label">Primary Insurance</div>
+          <div class="value">${notification.primaryInsurance}${notification.insuranceMemberId ? ` (ID: ${notification.insuranceMemberId})` : ''}</div>
+        </div>` : ''}
+        ${notification.secondaryInsurance ? `
+        <div class="info-row">
+          <div class="label">Secondary Insurance</div>
+          <div class="value">${notification.secondaryInsurance}</div>
+        </div>` : ''}
+        ${notification.responsibleParty ? `
+        <div class="info-row">
+          <div class="label">Responsible Party</div>
+          <div class="value">${notification.responsibleParty}</div>
+        </div>` : ''}
+      `;
+    }
 
-    <h3 style="color: #27A9E2; margin-top: 20px; margin-bottom: 15px;">🏥 Medical Information</h3>
+    let requestDetailsFields = '';
+    if (notification.careFor || notification.careSetting) {
+      const careForLabel = notification.careFor === 'self' ? 'Themselves' : 'A Loved One';
+      const settingMap: Record<string, string> = {
+        'in_home': 'In-Home Care',
+        'adult_day_health': 'Adult Day Health',
+        'clinic_visit': 'Clinic Visit',
+      };
+      const settingLabel = notification.careSetting ? settingMap[notification.careSetting] : undefined;
 
-    ${notification.primaryDiagnosis ? `
-    <div class="info-row">
-      <div class="label">Primary Diagnosis</div>
-      <div class="value">${notification.primaryDiagnosis}</div>
-    </div>` : ''}
+      requestDetailsFields = `
+        <h3 style="color: #27A9E2; margin-top: 20px; margin-bottom: 15px;">📝 Request Details</h3>
+        ${notification.careFor ? `
+        <div class="info-row">
+          <div class="label">Care Request For</div>
+          <div class="value">${careForLabel}</div>
+        </div>` : ''}
+        ${settingLabel ? `
+        <div class="info-row">
+          <div class="label">Preferred Care Setting</div>
+          <div class="value">${settingLabel}</div>
+        </div>` : ''}
+      `;
+    }
 
-    ${notification.secondaryConditions ? `
-    <div class="info-row">
-      <div class="label">Secondary Conditions</div>
-      <div class="value">${notification.secondaryConditions}</div>
-    </div>` : ''}
-
-    ${notification.allergies ? `
-    <div class="info-row">
-      <div class="label">Allergies</div>
-      <div class="value">${notification.allergies}</div>
-    </div>` : ''}
-
-    ${notification.physicianName ? `
-    <div class="info-row">
-      <div class="label">Physician</div>
-      <div class="value">${notification.physicianName}${notification.physicianContact ? ` (${notification.physicianContact})` : ''}</div>
-    </div>` : ''}
-
-    ${notification.assistiveDevices && notification.assistiveDevices.length > 0 ? `
-    <div class="info-row">
-      <div class="label">Assistive Devices</div>
-      <div class="value">${notification.assistiveDevices.join(', ')}</div>
-    </div>` : ''}
-
-    <h3 style="color: #27A9E2; margin-top: 20px; margin-bottom: 15px;">💉 Services Requested</h3>
-
-    ${notification.servicesRequested && notification.servicesRequested.length > 0 ? `
-    <div class="info-row">
-      <div class="label">Requested Services</div>
-      <div class="value">${notification.servicesRequested.join(', ')}</div>
-    </div>` : ''}
-
-    <h3 style="color: #27A9E2; margin-top: 20px; margin-bottom: 15px;">🚶 Mobility Assessment</h3>
-
-    ${notification.canWalkIndependently ? `
-    <div class="info-row">
-      <div class="label">Can Walk Independently</div>
-      <div class="value">${notification.canWalkIndependently === 'yes' ? 'Yes' : 'No'}</div>
-    </div>` : ''}
-
-    ${notification.assistanceLevel ? `
-    <div class="info-row">
-      <div class="label">Assistance Level</div>
-      <div class="value">${notification.assistanceLevel}</div>
-    </div>` : ''}
-
-    ${notification.fallHistory ? `
-    <div class="info-row">
-      <div class="label">Fall History (6 months)</div>
-      <div class="value">${notification.fallHistory === 'yes' ? 'Yes' : 'No'}</div>
-    </div>` : ''}
-
-    <h3 style="color: #27A9E2; margin-top: 20px; margin-bottom: 15px;">📞 Referral Source</h3>
-
-    ${notification.referralSource ? `
-    <div class="info-row">
-      <div class="label">Referral Source</div>
-      <div class="value">${notification.referralSource}${notification.referralAgency ? ` - ${notification.referralAgency}` : ''}</div>
-    </div>` : ''}
-
-    ${notification.referralContact ? `
-    <div class="info-row">
-      <div class="label">Referral Contact</div>
-      <div class="value">${notification.referralContact}</div>
-    </div>` : ''}
-
-    <h3 style="color: #27A9E2; margin-top: 20px; margin-bottom: 15px;">💳 Insurance & Payment</h3>
-
-    ${notification.primaryInsurance ? `
-    <div class="info-row">
-      <div class="label">Primary Insurance</div>
-      <div class="value">${notification.primaryInsurance}${notification.insuranceMemberId ? ` (ID: ${notification.insuranceMemberId})` : ''}</div>
-    </div>` : ''}
-
-    ${notification.secondaryInsurance ? `
-    <div class="info-row">
-      <div class="label">Secondary Insurance</div>
-      <div class="value">${notification.secondaryInsurance}</div>
-    </div>` : ''}
-
-    ${notification.responsibleParty ? `
-    <div class="info-row">
-      <div class="label">Responsible Party</div>
-      <div class="value">${notification.responsibleParty}</div>
-    </div>` : ''}
-
-    <h3 style="color: #27A9E2; margin-top: 20px; margin-bottom: 15px;">📝 Request Details</h3>
-
-    <div class="info-row">
-      <div class="label">Care Request For</div>
-      <div class="value">${careForLabel}</div>
-    </div>
-
-    <div class="info-row">
-      <div class="label">Preferred Care Setting</div>
-      <div class="value">${settingLabel}</div>
-    </div>
-    `;
+    specificFields = clientInfoFields + emergencyContactFields + medicalInfoFields + servicesFields + mobilityFields + referralFields + insuranceFields + requestDetailsFields;
   } else if (notification.serviceType === 'accreditation_consulting') {
     const agencyStatusMap: Record<string, string> = {
       'new_prelicensing': 'New / Pre-licensing',
@@ -583,6 +680,8 @@ function generateEmailHTML(notification: ContactNotification): string {
       <div class="value"><strong>${notification.contactValue}</strong></div>
     </div>
 
+    ${generateChatTranscriptHTML(notification.chatTranscript)}
+
     ${specificFields}
 
     <div class="info-row">
@@ -625,6 +724,7 @@ export async function sendContactNotification(notification: ContactNotification)
       'patient_intake': 'Patient / Client Intake',
       'accreditation_consulting': 'Accreditation & Consulting Support',
       'staffing_employment': 'Staffing & Employment',
+      'general_inquiry': 'General Contact Request',
     };
     const serviceTypeLabel = serviceTypeMap[notification.serviceType] || 'General Inquiry';
 
@@ -664,7 +764,8 @@ export async function sendContactNotification(notification: ContactNotification)
       console.log('TEXT VERSION:');
       console.log(textBody);
       console.log('-'.repeat(80));
-      console.log('(HTML version also available but not shown)');
+      console.log('HTML VERSION (FULL EMAIL TEMPLATE):');
+      console.log(htmlBody);
       console.log('='.repeat(80) + '\n');
 
       return true;
@@ -740,6 +841,7 @@ export async function sendAdminNotificationEmail(notification: ContactNotificati
       'patient_intake': 'Patient / Client Intake',
       'accreditation_consulting': 'Accreditation & Consulting Support',
       'staffing_employment': 'Staffing & Employment',
+      'general_inquiry': 'General Contact Request',
     };
     const serviceTypeLabel = serviceTypeMap[notification.serviceType] || 'General Inquiry';
 
@@ -777,7 +879,8 @@ export async function sendAdminNotificationEmail(notification: ContactNotificati
       console.log('TEXT VERSION:');
       console.log(textBody);
       console.log('-'.repeat(80));
-      console.log('(HTML version also available but not shown)');
+      console.log('HTML VERSION (FULL EMAIL TEMPLATE):');
+      console.log(htmlBody);
       console.log('='.repeat(80) + '\n');
 
       return true;

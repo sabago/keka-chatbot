@@ -8,6 +8,13 @@ const router = Router();
 
 router.post('/chat', async (req: Request, res: Response) => {
   try {
+    // DEBUG: Log every request to /api/chat
+    logger.info('chat_endpoint_hit', {
+      message_preview: req.body.message?.substring(0, 50),
+      session_id: req.body.session_id,
+      state: req.body.session_data?.state,
+    });
+
     // Validate request
     const validatedRequest = ChatRequestSchema.parse(req.body);
 
