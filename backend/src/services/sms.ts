@@ -25,7 +25,7 @@ if (!isDevelopment) {
 }
 
 interface SMSNotification {
-  serviceType: 'patient_intake' | 'accreditation_consulting' | 'staffing_employment';
+  serviceType: 'patient_intake' | 'accreditation_consulting' | 'staffing_employment' | 'general_inquiry';
   contactName?: string;
   contactType: 'phone' | 'email';
   contactValue: string;
@@ -78,6 +78,7 @@ function formatSMSMessage(notification: SMSNotification): string {
     patient_intake: 'Patient/Client Intake',
     accreditation_consulting: 'Accreditation & Consulting',
     staffing_employment: 'Staffing & Employment',
+    general_inquiry: 'General Contact',
   };
 
   let message = `🚨 NEW ${serviceTypeLabels[notification.serviceType].toUpperCase()} REQUEST\n\n`;

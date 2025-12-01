@@ -3,12 +3,14 @@ import { ExclamationCircleIcon } from "@heroicons/react/24/solid";
 import {
   validateEmail,
   validatePhone,
+  validateDate,
+  validateDateRange,
   getErrorMessage,
   formatPhone,
 } from "../../utils/validation";
 
 interface DynamicInputFormProps {
-  inputType: "text" | "email" | "phone" | "textarea";
+  inputType: "text" | "email" | "phone" | "textarea" | "date";
   label?: string;
   placeholder?: string;
   initialValue?: string;
@@ -36,7 +38,7 @@ export default function DynamicInputForm({
     e.preventDefault();
 
     // Validate based on input type
-    if (inputType === "email" || inputType === "phone") {
+    if (inputType === "email" || inputType === "phone" || inputType === "date") {
       const errorMsg = getErrorMessage(inputType, value);
       if (errorMsg) {
         setError(errorMsg);
@@ -66,6 +68,7 @@ export default function DynamicInputForm({
     if (!value.trim()) return false;
     if (inputType === "email") return validateEmail(value);
     if (inputType === "phone") return validatePhone(value);
+    if (inputType === "date") return validateDate(value) && validateDateRange(value);
     return true; // text and textarea just need to be non-empty
   })();
 
@@ -76,6 +79,8 @@ export default function DynamicInputForm({
         return "Your email address";
       case "phone":
         return "Your phone number";
+      case "date":
+        return "Date";
       case "text":
         return "Your response";
       case "textarea":
@@ -92,6 +97,8 @@ export default function DynamicInputForm({
         return "you@example.com";
       case "phone":
         return "(555) 123-4567";
+      case "date":
+        return "MM/DD/YYYY";
       case "text":
         return "Type your answer...";
       case "textarea":
@@ -107,6 +114,8 @@ export default function DynamicInputForm({
         return "Enter a valid email address (e.g., you@example.com)";
       case "phone":
         return "Enter a valid US phone number (10 digits, e.g., 555-123-4567)";
+      case "date":
+        return "Enter a date (e.g., 1/15/1990 or 01/15/1990)";
       default:
         return "";
     }

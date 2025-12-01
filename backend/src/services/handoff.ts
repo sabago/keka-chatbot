@@ -2,7 +2,6 @@ import crypto from 'crypto';
 import { HandoffRequest } from '../types/schema';
 import { logger } from '../utils/logger';
 import { sendContactNotification } from './email';
-import { sendSMSNotification } from './sms';
 import { getPool } from '../db/init';
 import fs from 'fs';
 import path from 'path';
@@ -158,6 +157,7 @@ export async function saveHandoffRequest(request: HandoffRequest, ipHash: string
     contactName: request.contact_name,
     contactType: request.contact_type,
     contactValue: request.contact_value,
+    chatTranscript: request.chat_transcript, // Include chat conversation
 
     // Patient intake fields - Section 1: Client Information
     dateOfBirth: request.date_of_birth,
@@ -213,37 +213,28 @@ export async function saveHandoffRequest(request: HandoffRequest, ipHash: string
 
     // Staffing/Employment fields
     discipline: request.discipline,
-    license: request.license_number && request.license_state
-      ? `${request.license_number} - ${request.license_state}`
-      : undefined,
-    experience: request.years_experience,
-    workArea: request.preferred_work_area,
+    licenseNumber: request.license_number,
+    licenseState: request.license_state,
+    yearsExperience: request.years_experience,
+    preferredWorkArea: request.preferred_work_area,
     availability: request.availability,
-    transportation: request.has_transportation ? 'Yes' : 'No',
-    consent: request.consent_given ? 'Yes' : 'No',
+    hasTransportation: request.has_transportation,
+    consentGiven: request.consent_given,
   };
 
   try {
-    if (request.contact_type === 'email') {
-      // Send email notification
-      notificationSent = await sendContactNotification({
-        ...notificationData,
-        sessionId: request.session_id,
-        timestamp: record.timestamp,
-      });
-      logger.info('handoff_email_sent', {
-        id: record.id,
-        success: notificationSent,
-      });
-    } else if (request.contact_type === 'phone') {
-      // Send SMS notification
-      await sendSMSNotification(notificationData);
-      notificationSent = true;
-      logger.info('handoff_sms_sent', {
-        id: record.id,
-        success: true,
-      });
-    }
+    // Always send email notification (regardless of contact_type preference)
+    // The email will indicate whether user prefers email or phone contact
+    notificationSent = await sendContactNotification({
+      ...notificationData,
+      sessionId: request.session_id,
+      timestamp: record.timestamp,
+    });
+    logger.info('handoff_email_sent', {
+      id: record.id,
+      success: notificationSent,
+      preferred_contact_method: request.contact_type,
+    });
   } catch (error) {
     logger.error('handoff_notification_failed', {
       id: record.id,
@@ -258,7 +249,7 @@ export async function saveHandoffRequest(request: HandoffRequest, ipHash: string
     db_saved: dbSaved,
     file_saved: fileSaved,
     notification_sent: notificationSent,
-    notification_type: request.contact_type,
+    preferred_contact_method: request.contact_type,
   });
 
   return record;
@@ -273,10 +264,46 @@ export function validateContact(type: 'phone' | 'email', value: string): boolean
   }
 
   if (type === 'phone') {
-    // Basic phone validation (allows various formats)
-    const phoneRegex = /^[\d\s\-\(\)\+\.]{10,}$/;
-    return phoneRegex.test(value);
+    // Simple validation: Check for exactly 10 digits (US format)
+    // Extract only digits and check the count
+    const digitsOnly = value.replace(/\D/g, '');
+    return digitsOnly.length === 10;
   }
 
   return false;
+}
+
+// Validate date format - accepts both M/D/YYYY and MM/DD/YYYY
+export function validateDate(dateString: string): boolean {
+  // Check format using regex - accepts both single and double digit month/day
+  // Month: 1-9 or 01-09 or 10-12
+  // Day: 1-9 or 01-09 or 10-31
+  const dateRegex = /^(0?[1-9]|1[0-2])\/(0?[1-9]|[12][0-9]|3[01])\/(\d{4})$/;
+
+  if (!dateRegex.test(dateString)) {
+    return false;
+  }
+
+  // Parse and validate as actual date
+  const [month, day, year] = dateString.split('/').map(Number);
+  const date = new Date(year, month - 1, day);
+
+  // Check if the date is valid (handles leap years, invalid days per month)
+  return (
+    date.getFullYear() === year &&
+    date.getMonth() === month - 1 &&
+    date.getDate() === day
+  );
+}
+
+// Validate date is within reasonable range (1900-2025)
+export function validateDateRange(dateString: string): boolean {
+  if (!validateDate(dateString)) {
+    return false;
+  }
+
+  const [, , year] = dateString.split('/').map(Number);
+  const currentYear = new Date().getFullYear();
+
+  return year >= 1900 && year <= currentYear + 1;
 }

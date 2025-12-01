@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import { BotResponse, ChatRequest, containsPHI, Button } from '../types/schema';
 import { getHomeScreen, getCategoryButtons, getFAQAnswer, getResolutionButtons } from './faq';
 import { generateRetrievalResponse } from './retrieve';
-import { saveHandoffRequest } from './handoff';
+import { saveHandoffRequest, validateContact, validateDate, validateDateRange } from './handoff';
 import { sendAdminNotificationEmail } from './email';
 import { logger } from '../utils/logger';
 import { pushState, popState, canGoBack, clearHistory } from '../utils/stateHistory';
@@ -19,6 +19,28 @@ function addNavigationButtons(buttons: Button[] = [], sessionData: any = {}): Bu
     { label: 'Back to Menu', value: 'home' },
     { label: 'Speak to a Human', value: 'contact_me' },
   ];
+}
+
+// Helper to add bot response to chat transcript and return updated response
+function addBotResponseToTranscript(response: BotResponse, chatTranscript: any[]): BotResponse {
+  // Add bot's response to transcript
+  const updatedTranscript = [
+    ...chatTranscript,
+    {
+      sender: 'bot' as const,
+      text: response.text,
+      timestamp: new Date().toISOString(),
+    },
+  ];
+
+  // Include transcript in session_data
+  return {
+    ...response,
+    session_data: {
+      ...response.session_data,
+      chat_transcript: updatedTranscript,
+    },
+  };
 }
 
 // Restore state response when user navigates back
@@ -73,7 +95,7 @@ function restoreStateResponse(sessionData: any): BotResponse {
     case 'awaiting_dob':
       return {
         text: 'Thank you! Now let\'s collect some basic information. What is the patient\'s date of birth?',
-        input_type: 'text',
+        input_type: 'date',
         input_label: 'Date of Birth',
         input_placeholder: 'MM/DD/YYYY',
         buttons: addNavigationButtons([], sessionData),
@@ -441,9 +463,9 @@ function restoreStateResponse(sessionData: any): BotResponse {
     case 'awaiting_start_date':
       return {
         text: 'When would you like to get started?',
-        input_type: 'text',
+        input_type: 'date',
         input_label: 'Preferred Start Date',
-        input_placeholder: 'e.g., January 2025, As soon as possible',
+        input_placeholder: 'MM/DD/YYYY',
         buttons: addNavigationButtons([], sessionData),
         next_state: 'awaiting_start_date',
         session_data: sessionData,
@@ -697,6 +719,10 @@ export async function handleChatMessage(request: ChatRequest, ipHash: string): P
       return handleAwaitingStartDate(message, session_data);
 
     case 'awaiting_notes_accreditation':
+      logger.info('state_route_awaiting_notes_accreditation', {
+        session_id: request.session_id,
+        service_type: session_data?.service_type,
+      });
       return await handleAwaitingNotesAccreditation(message, session_data, ipHash, request.session_id);
 
     // Staffing/Employment flow states
@@ -722,6 +748,11 @@ export async function handleChatMessage(request: ChatRequest, ipHash: string): P
       return await handleAwaitingConsent(message, session_data, ipHash, request.session_id);
 
     case 'awaiting_submit_confirmation':
+      logger.info('state_route_awaiting_submit_confirmation', {
+        session_id: request.session_id,
+        service_type: session_data?.service_type,
+        message: message,
+      });
       return await handleAwaitingSubmitConfirmation(message, session_data, ipHash, request.session_id);
 
     case 'complete':
@@ -802,41 +833,12 @@ function handleUserChoice(message: string, sessionData: any): BotResponse {
   }
 
   if (choice === 'contact_me' || choice === 'something_else') {
-    // Send immediate admin notification that user needs human help
-    try {
-      const currentSessionId = crypto.randomUUID(); // Generate session ID for this notification
-      logger.info('user_requested_human_help', {
-        session_id: currentSessionId,
-        context: sessionData?.category || 'unknown',
-        flow: choice,
-      });
-
-      // Prepare notification data with available context
-      const notificationData = {
-        serviceType: 'patient_intake' as const, // Default to patient_intake since we don't know yet
-        contactType: 'email' as const, // Placeholder - will get real contact info later
-        contactValue: 'PENDING - User requested human help, awaiting contact info',
-        contactName: sessionData?.contact_name,
-        timestamp: new Date().toISOString(),
-        sessionId: currentSessionId,
-        flow: choice === 'something_else' ? 'something_else - User needs help with unlisted topic' : 'followup - User needs more assistance',
-        // Add any context we have
-        careFor: sessionData?.care_for,
-        careSetting: sessionData?.care_setting,
-      };
-
-      // Send notification (async, don't wait)
-      sendAdminNotificationEmail(notificationData).catch(error => {
-        logger.error('immediate_human_help_notification_failed', {
-          error: String(error),
-          session_id: currentSessionId,
-        });
-      });
-    } catch (error) {
-      logger.error('immediate_human_help_notification_error', {
-        error: String(error),
-      });
-    }
+    // Log that user requested human help (email will be sent after they provide contact info)
+    logger.info('user_requested_human_help', {
+      session_id: sessionData?.session_id || 'unknown',
+      context: sessionData?.category || 'unknown',
+      flow: choice,
+    });
 
     const messageText = choice === 'something_else'
       ? 'We can help you with that! How would you like us to reach you?'
@@ -845,6 +847,7 @@ function handleUserChoice(message: string, sessionData: any): BotResponse {
     const newSessionData = {
       ...sessionData,
       state: 'awaiting_contact',
+      service_type: 'patient_intake', // Default to patient_intake
       flow: choice === 'something_else' ? 'something_else' : 'followup',
     };
 
@@ -947,13 +950,72 @@ function handleAwaitingContact(message: string, sessionData: any): BotResponse {
     };
   }
 
-  // Step 3: If user has provided contact value - branch based on service type
+  // Step 3: If user has provided contact value - branch based on flow type
   const contactType = sessionData?.contact_type;
   if (contactType) {
-    const updatedSessionData = pushState(sessionData);
+    // Validate contact value before proceeding
+    if (!validateContact(contactType as 'phone' | 'email', message)) {
+      return {
+        text: contactType === 'email'
+          ? 'Please enter a valid email address (e.g., you@example.com):'
+          : 'Please enter a valid phone number with at least 10 digits:',
+        input_type: contactType === 'email' ? 'email' : 'phone',
+        input_label: contactType === 'email' ? 'Your Email Address' : 'Your Phone Number',
+        input_placeholder: contactType === 'email' ? 'you@example.com' : '(555) 123-4567',
+        buttons: addNavigationButtons([], sessionData),
+        next_state: 'awaiting_contact',
+        session_data: sessionData,
+      };
+    }
 
-    // Patient intake flow - now goes to comprehensive intake (DOB first)
-    if (serviceType === 'patient_intake') {
+    const updatedSessionData = pushState(sessionData);
+    const flow = sessionData?.flow;
+
+    // If this is a simple "Contact me" or "Something else" request (not a full intake), send email immediately
+    if (flow === 'followup' || flow === 'something_else') {
+      const finalSessionData = {
+        ...updatedSessionData,
+        state: 'complete',
+        contact_value: message,
+      };
+
+      // Add the user's contact value (email/phone) to the transcript
+      const updatedTranscript = [
+        ...(sessionData?.chat_transcript || []),
+        {
+          sender: 'user' as const,
+          text: message,
+          timestamp: new Date().toISOString(),
+        },
+      ];
+
+      // Send email notification with chat transcript (async, don't wait)
+      const notificationData = {
+        serviceType: 'general_inquiry' as const,
+        contactType: contactType as 'email' | 'phone',
+        contactValue: message,
+        contactName: sessionData?.contact_name,
+        chatTranscript: updatedTranscript,
+        timestamp: new Date().toISOString(),
+        sessionId: sessionData?.session_id || 'unknown',
+      };
+
+      sendAdminNotificationEmail(notificationData).catch(error => {
+        logger.error('contact_me_email_failed', {
+          error: String(error),
+        });
+      });
+
+      return {
+        text: 'Thank you! Our team will reach out to you within 1-2 business days.\n\nFor urgent questions, call us at (617) 427-8494.',
+        buttons: addNavigationButtons([], finalSessionData),
+        next_state: 'complete',
+        session_data: finalSessionData,
+      };
+    }
+
+    // Patient intake flow (full form) - now goes to comprehensive intake (DOB first)
+    if (serviceType === 'patient_intake' && flow === 'patient_intake') {
       const finalSessionData = {
         ...updatedSessionData,
         state: 'awaiting_dob',
@@ -961,7 +1023,7 @@ function handleAwaitingContact(message: string, sessionData: any): BotResponse {
       };
       return {
         text: 'Thank you! Now let\'s collect some basic information. What is the patient\'s date of birth?',
-        input_type: 'text',
+        input_type: 'date',
         input_label: 'Date of Birth',
         input_placeholder: 'MM/DD/YYYY',
         buttons: addNavigationButtons([], finalSessionData),
@@ -1021,6 +1083,31 @@ function handleAwaitingContact(message: string, sessionData: any): BotResponse {
 
 // Handle Date of Birth collection
 function handleAwaitingDOB(message: string, sessionData: any): BotResponse {
+  // Validate date format and range
+  if (!validateDate(message)) {
+    return {
+      text: 'Please enter a valid date of birth (e.g., 1/15/1990 or 01/15/1990):',
+      input_type: 'date',
+      input_label: 'Date of Birth',
+      input_placeholder: 'M/D/YYYY or MM/DD/YYYY',
+      buttons: addNavigationButtons([], sessionData),
+      next_state: 'awaiting_dob',
+      session_data: sessionData,
+    };
+  }
+
+  if (!validateDateRange(message)) {
+    return {
+      text: 'Please enter a date of birth between 1900 and the current year:',
+      input_type: 'date',
+      input_label: 'Date of Birth',
+      input_placeholder: 'M/D/YYYY or MM/DD/YYYY',
+      buttons: addNavigationButtons([], sessionData),
+      next_state: 'awaiting_dob',
+      session_data: sessionData,
+    };
+  }
+
   const updatedSessionData = pushState(sessionData);
   const finalSessionData = {
     ...updatedSessionData,
@@ -1189,6 +1276,19 @@ function handleAwaitingEmergencyContact(message: string, sessionData: any): BotR
   }
 
   if (step === 'phone') {
+    // Validate phone format
+    if (!validateContact('phone', message)) {
+      return {
+        text: 'Please enter a valid phone number with at least 10 digits:',
+        input_type: 'phone',
+        input_label: 'Emergency Contact Phone',
+        input_placeholder: '(555) 123-4567',
+        buttons: addNavigationButtons([], sessionData),
+        next_state: 'awaiting_emergency_contact',
+        session_data: sessionData,
+      };
+    }
+
     const finalSessionData = {
       ...updatedSessionData,
       state: 'awaiting_medical_info',
@@ -1914,6 +2014,19 @@ function handleAwaitingAgencyStatus(message: string, sessionData: any): BotRespo
 
 // Handle preferred start date
 function handleAwaitingStartDate(message: string, sessionData: any): BotResponse {
+  // Validate date format
+  if (!validateDate(message)) {
+    return {
+      text: 'Please enter a valid date (e.g., 3/15/2025 or 03/15/2025):',
+      input_type: 'date',
+      input_label: 'Preferred Start Date',
+      input_placeholder: 'M/D/YYYY or MM/DD/YYYY',
+      buttons: addNavigationButtons([], sessionData),
+      next_state: 'awaiting_start_date',
+      session_data: sessionData,
+    };
+  }
+
   const updatedSessionData = pushState(sessionData);
   const finalSessionData = {
     ...updatedSessionData,
@@ -1940,12 +2053,26 @@ async function handleAwaitingNotesAccreditation(message: string, sessionData: an
   const notes = choice === 'skip' ? undefined : message;
   const updatedSessionData = pushState(sessionData);
 
+  // DEBUG: Log that we reached this handler
+  logger.info('handleAwaitingNotesAccreditation_called', {
+    session_id: sessionId,
+    message_choice: choice,
+    service_type: sessionData.service_type,
+  });
+
   // Store notes and show submit button
   const finalSessionData = {
     ...updatedSessionData,
     state: 'awaiting_submit_confirmation',
     notes_accreditation: notes,
   };
+
+  logger.info('accreditation_showing_submit_button', {
+    session_id: sessionId,
+    next_state: 'awaiting_submit_confirmation',
+    service_type: sessionData.service_type,
+  });
+
   return {
     text: 'Perfect! You\'re all set! Please review your information and click the button below to submit your request. Our accreditation and consulting team will contact you within 1-2 business days.',
     buttons: addNavigationButtons([
@@ -2199,6 +2326,14 @@ async function handleAwaitingSubmitConfirmation(message: string, sessionData: an
   const choice = message.toLowerCase();
   const updatedSessionData = pushState(sessionData);
 
+  // DEBUG: Log that we reached this handler
+  logger.info('handleAwaitingSubmitConfirmation_called', {
+    session_id: sessionId,
+    choice: choice,
+    service_type: sessionData.service_type,
+    state: sessionData.state,
+  });
+
   if (choice === 'submit_intake') {
     const serviceType = sessionData.service_type || 'patient_intake';
 
@@ -2208,6 +2343,7 @@ async function handleAwaitingSubmitConfirmation(message: string, sessionData: an
       contactName: sessionData.contact_name,
       contactType: sessionData.contact_type,
       contactValue: sessionData.contact_value,
+      chatTranscript: sessionData.chat_transcript || [], // Include chat conversation
       sessionId: sessionId,
       timestamp: new Date().toISOString(),
     };
@@ -2286,6 +2422,7 @@ async function handleAwaitingSubmitConfirmation(message: string, sessionData: an
         contact_name: sessionData.contact_name,
         contact_type: sessionData.contact_type,
         contact_value: sessionData.contact_value,
+        chat_transcript: sessionData.chat_transcript || [], // Include chat conversation
         topic: sessionData.flow || serviceType,
         session_id: sessionId,
       };

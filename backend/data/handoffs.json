@@ -270,5 +270,1604 @@
     "care_setting": "in_home",
     "timestamp": "2025-11-26T20:07:21.594Z",
     "id": "5d4a5a34-6ab0-41ac-ac21-522b2444fc7a"
+  },
+  {
+    "service_type": "patient_intake",
+    "contact_name": "Sandra Casey",
+    "contact_type": "phone",
+    "contact_value": "(617) 953-0639",
+    "chat_transcript": [
+      {
+        "sender": "bot",
+        "text": "Welcome to Keka Rehab Services. How can we help you today?",
+        "timestamp": "2025-11-29T19:29:35.143Z"
+      },
+      {
+        "sender": "user",
+        "text": "🏥 Patient / Client Intake",
+        "timestamp": "2025-11-29T19:29:38.880Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Let's get started with your care request. What's your name?",
+        "timestamp": "2025-11-29T19:29:38.891Z"
+      },
+      {
+        "sender": "user",
+        "text": "Sandra Casey",
+        "timestamp": "2025-11-29T19:29:41.804Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Thank you! How would you like us to reach you?",
+        "timestamp": "2025-11-29T19:29:41.815Z"
+      },
+      {
+        "sender": "user",
+        "text": "Phone",
+        "timestamp": "2025-11-29T19:29:44.695Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Please enter your phone number:",
+        "timestamp": "2025-11-29T19:29:44.704Z"
+      },
+      {
+        "sender": "user",
+        "text": "(617) 953-0639",
+        "timestamp": "2025-11-29T19:29:48.949Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Thank you! Now let's collect some basic information. What is the patient's date of birth?",
+        "timestamp": "2025-11-29T19:29:48.960Z"
+      },
+      {
+        "sender": "user",
+        "text": "06/14/1990",
+        "timestamp": "2025-11-29T19:29:52.299Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Thank you! What is the patient's gender?",
+        "timestamp": "2025-11-29T19:29:52.309Z"
+      },
+      {
+        "sender": "user",
+        "text": "Female",
+        "timestamp": "2025-11-29T19:29:55.148Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Great! Now, what is the patient's street address?",
+        "timestamp": "2025-11-29T19:29:55.159Z"
+      },
+      {
+        "sender": "user",
+        "text": "108 Casey St",
+        "timestamp": "2025-11-29T19:29:59.134Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What city?",
+        "timestamp": "2025-11-29T19:29:59.145Z"
+      },
+      {
+        "sender": "user",
+        "text": "Norwood",
+        "timestamp": "2025-11-29T19:30:04.331Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What state?",
+        "timestamp": "2025-11-29T19:30:04.341Z"
+      },
+      {
+        "sender": "user",
+        "text": "MA",
+        "timestamp": "2025-11-29T19:30:07.898Z"
+      },
+      {
+        "sender": "bot",
+        "text": "And the ZIP code?",
+        "timestamp": "2025-11-29T19:30:07.911Z"
+      },
+      {
+        "sender": "user",
+        "text": "02062",
+        "timestamp": "2025-11-29T19:30:13.148Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Perfect! Now, who should we contact in case of an emergency? What is their name?",
+        "timestamp": "2025-11-29T19:30:13.160Z"
+      },
+      {
+        "sender": "user",
+        "text": "Gene Casey",
+        "timestamp": "2025-11-29T19:30:17.881Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What is their relationship to the patient?",
+        "timestamp": "2025-11-29T19:30:17.887Z"
+      },
+      {
+        "sender": "user",
+        "text": "Husband",
+        "timestamp": "2025-11-29T19:30:22.635Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What is their phone number?",
+        "timestamp": "2025-11-29T19:30:22.642Z"
+      },
+      {
+        "sender": "user",
+        "text": "(617) 906-5893",
+        "timestamp": "2025-11-29T19:30:29.408Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Now for some medical information. What is the primary diagnosis or reason for referral?",
+        "timestamp": "2025-11-29T19:30:29.420Z"
+      },
+      {
+        "sender": "user",
+        "text": "none",
+        "timestamp": "2025-11-29T19:30:33.315Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Are there any secondary conditions we should know about?",
+        "timestamp": "2025-11-29T19:30:33.325Z"
+      },
+      {
+        "sender": "user",
+        "text": "none",
+        "timestamp": "2025-11-29T19:30:37.015Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Does the patient have any allergies?",
+        "timestamp": "2025-11-29T19:30:37.029Z"
+      },
+      {
+        "sender": "user",
+        "text": "none",
+        "timestamp": "2025-11-29T19:30:41.440Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Who is the patient's primary physician or provider?",
+        "timestamp": "2025-11-29T19:30:41.455Z"
+      },
+      {
+        "sender": "user",
+        "text": "Dr.Smith",
+        "timestamp": "2025-11-29T19:30:46.109Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What is the physician's contact information?",
+        "timestamp": "2025-11-29T19:30:46.117Z"
+      },
+      {
+        "sender": "user",
+        "text": "6179658970",
+        "timestamp": "2025-11-29T19:30:52.789Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Does the patient currently use any assistive devices? (Select all that apply)",
+        "timestamp": "2025-11-29T19:30:52.803Z"
+      },
+      {
+        "sender": "user",
+        "text": "None",
+        "timestamp": "2025-11-29T19:30:55.323Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What services is the patient requesting? (Select all that apply)",
+        "timestamp": "2025-11-29T19:30:55.336Z"
+      },
+      {
+        "sender": "user",
+        "text": "Home Health Aide",
+        "timestamp": "2025-11-29T19:31:03.169Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Added: hha. Select more or click \"Done Selecting\"",
+        "timestamp": "2025-11-29T19:31:03.184Z"
+      },
+      {
+        "sender": "user",
+        "text": "Done Selecting",
+        "timestamp": "2025-11-29T19:31:08.329Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Can the patient walk independently?",
+        "timestamp": "2025-11-29T19:31:08.345Z"
+      },
+      {
+        "sender": "user",
+        "text": "Yes",
+        "timestamp": "2025-11-29T19:31:11.434Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What level of assistance does the patient need for walking?",
+        "timestamp": "2025-11-29T19:31:11.444Z"
+      },
+      {
+        "sender": "user",
+        "text": "Independent",
+        "timestamp": "2025-11-29T19:31:16.802Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Has the patient had any falls in the last 6 months?",
+        "timestamp": "2025-11-29T19:31:16.821Z"
+      },
+      {
+        "sender": "user",
+        "text": "No",
+        "timestamp": "2025-11-29T19:31:18.868Z"
+      },
+      {
+        "sender": "bot",
+        "text": "How did you hear about Keka Rehab Services?",
+        "timestamp": "2025-11-29T19:31:18.885Z"
+      },
+      {
+        "sender": "user",
+        "text": "Other",
+        "timestamp": "2025-11-29T19:31:24.101Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Almost done! What is the patient's primary insurance provider?",
+        "timestamp": "2025-11-29T19:31:24.112Z"
+      },
+      {
+        "sender": "user",
+        "text": "bcbs",
+        "timestamp": "2025-11-29T19:31:30.206Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What is the insurance member ID or policy number?",
+        "timestamp": "2025-11-29T19:31:30.227Z"
+      },
+      {
+        "sender": "user",
+        "text": "1234567",
+        "timestamp": "2025-11-29T19:31:34.855Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Is there a secondary insurance?",
+        "timestamp": "2025-11-29T19:31:34.863Z"
+      },
+      {
+        "sender": "user",
+        "text": "none",
+        "timestamp": "2025-11-29T19:31:40.177Z"
+      },
+      {
+        "sender": "bot",
+        "text": "If different from the patient, who is the responsible party for billing?",
+        "timestamp": "2025-11-29T19:31:40.194Z"
+      },
+      {
+        "sender": "user",
+        "text": "none",
+        "timestamp": "2025-11-29T19:31:45.523Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Final question! Is this care request for you or a loved one?",
+        "timestamp": "2025-11-29T19:31:45.544Z"
+      },
+      {
+        "sender": "user",
+        "text": "For Me",
+        "timestamp": "2025-11-29T19:31:50.732Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What care setting would work best?",
+        "timestamp": "2025-11-29T19:31:50.750Z"
+      },
+      {
+        "sender": "user",
+        "text": "In-Home",
+        "timestamp": "2025-11-29T19:31:53.308Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Great! You've selected In-Home Care.\n\nYou're all set! Please review your information and click the button below to submit your intake form. Our team will contact you within 1-2 business days.",
+        "timestamp": "2025-11-29T19:31:53.328Z"
+      }
+    ],
+    "topic": "patient_intake",
+    "session_id": "535027a1-2588-4116-be4b-2b0e2c406522",
+    "date_of_birth": "06/14/1990",
+    "gender": "female",
+    "address_street": "108 Casey St",
+    "address_city": "Norwood",
+    "address_state": "MA",
+    "address_zip": "02062",
+    "emergency_contact_name": "Gene Casey",
+    "emergency_contact_relationship": "Husband",
+    "emergency_contact_phone": "(617) 906-5893",
+    "primary_diagnosis": "none",
+    "secondary_conditions": "none",
+    "allergies": "none",
+    "physician_name": "Dr.Smith",
+    "physician_contact": "6179658970",
+    "assistive_devices": [
+      "none"
+    ],
+    "services_requested": [
+      "hha"
+    ],
+    "can_walk_independently": "yes",
+    "assistance_level": "independent",
+    "fall_history": "no",
+    "referral_source": "other",
+    "primary_insurance": "bcbs",
+    "insurance_member_id": "1234567",
+    "secondary_insurance": "none",
+    "responsible_party": "none",
+    "care_for": "self",
+    "care_setting": "in_home",
+    "timestamp": "2025-11-29T19:31:59.352Z",
+    "id": "a9b88a65-0777-4c5b-8275-cf3a0825877b"
+  },
+  {
+    "service_type": "patient_intake",
+    "contact_name": "Sandra Casey",
+    "contact_type": "phone",
+    "contact_value": "(617) 953-0639",
+    "chat_transcript": [
+      {
+        "sender": "bot",
+        "text": "Welcome to Keka Rehab Services. How can we help you today?",
+        "timestamp": "2025-11-29T19:34:15.913Z"
+      },
+      {
+        "sender": "user",
+        "text": "🏥 Patient / Client Intake",
+        "timestamp": "2025-11-29T19:34:18.189Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Let's get started with your care request. What's your name?",
+        "timestamp": "2025-11-29T19:34:18.199Z"
+      },
+      {
+        "sender": "user",
+        "text": "Sandra Casey",
+        "timestamp": "2025-11-29T19:34:20.523Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Thank you! How would you like us to reach you?",
+        "timestamp": "2025-11-29T19:34:20.551Z"
+      },
+      {
+        "sender": "user",
+        "text": "Phone",
+        "timestamp": "2025-11-29T19:34:22.114Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Please enter your phone number:",
+        "timestamp": "2025-11-29T19:34:22.123Z"
+      },
+      {
+        "sender": "user",
+        "text": "(617) 953-0639",
+        "timestamp": "2025-11-29T19:34:25.583Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Thank you! Now let's collect some basic information. What is the patient's date of birth?",
+        "timestamp": "2025-11-29T19:34:25.594Z"
+      },
+      {
+        "sender": "user",
+        "text": "06/14/1990",
+        "timestamp": "2025-11-29T19:34:29.523Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Thank you! What is the patient's gender?",
+        "timestamp": "2025-11-29T19:34:29.536Z"
+      },
+      {
+        "sender": "user",
+        "text": "Female",
+        "timestamp": "2025-11-29T19:34:30.823Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Great! Now, what is the patient's street address?",
+        "timestamp": "2025-11-29T19:34:30.837Z"
+      },
+      {
+        "sender": "user",
+        "text": "108 Casey St",
+        "timestamp": "2025-11-29T19:34:34.015Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What city?",
+        "timestamp": "2025-11-29T19:34:34.026Z"
+      },
+      {
+        "sender": "user",
+        "text": "Norwood",
+        "timestamp": "2025-11-29T19:34:37.856Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What state?",
+        "timestamp": "2025-11-29T19:34:37.862Z"
+      },
+      {
+        "sender": "user",
+        "text": "MA",
+        "timestamp": "2025-11-29T19:34:40.781Z"
+      },
+      {
+        "sender": "bot",
+        "text": "And the ZIP code?",
+        "timestamp": "2025-11-29T19:34:40.793Z"
+      },
+      {
+        "sender": "user",
+        "text": "02062",
+        "timestamp": "2025-11-29T19:34:43.873Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Perfect! Now, who should we contact in case of an emergency? What is their name?",
+        "timestamp": "2025-11-29T19:34:43.884Z"
+      },
+      {
+        "sender": "user",
+        "text": "Gene Casey",
+        "timestamp": "2025-11-29T19:34:47.164Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What is their relationship to the patient?",
+        "timestamp": "2025-11-29T19:34:47.171Z"
+      },
+      {
+        "sender": "user",
+        "text": "Husband",
+        "timestamp": "2025-11-29T19:34:50.201Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What is their phone number?",
+        "timestamp": "2025-11-29T19:34:50.218Z"
+      },
+      {
+        "sender": "user",
+        "text": "(617) 906-5893",
+        "timestamp": "2025-11-29T19:34:52.956Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Now for some medical information. What is the primary diagnosis or reason for referral?",
+        "timestamp": "2025-11-29T19:34:52.967Z"
+      },
+      {
+        "sender": "user",
+        "text": "none",
+        "timestamp": "2025-11-29T19:34:55.947Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Are there any secondary conditions we should know about?",
+        "timestamp": "2025-11-29T19:34:55.958Z"
+      },
+      {
+        "sender": "user",
+        "text": "na",
+        "timestamp": "2025-11-29T19:34:59.061Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Does the patient have any allergies?",
+        "timestamp": "2025-11-29T19:34:59.075Z"
+      },
+      {
+        "sender": "user",
+        "text": "na",
+        "timestamp": "2025-11-29T19:35:01.957Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Who is the patient's primary physician or provider?",
+        "timestamp": "2025-11-29T19:35:01.972Z"
+      },
+      {
+        "sender": "user",
+        "text": "Dr.Smith",
+        "timestamp": "2025-11-29T19:35:05.674Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What is the physician's contact information?",
+        "timestamp": "2025-11-29T19:35:05.688Z"
+      },
+      {
+        "sender": "user",
+        "text": "6179658970",
+        "timestamp": "2025-11-29T19:35:08.890Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Does the patient currently use any assistive devices? (Select all that apply)",
+        "timestamp": "2025-11-29T19:35:08.903Z"
+      },
+      {
+        "sender": "user",
+        "text": "None",
+        "timestamp": "2025-11-29T19:35:10.327Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What services is the patient requesting? (Select all that apply)",
+        "timestamp": "2025-11-29T19:35:10.341Z"
+      },
+      {
+        "sender": "user",
+        "text": "Skilled Nursing",
+        "timestamp": "2025-11-29T19:35:15.640Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Added: nursing. Select more or click \"Done Selecting\"",
+        "timestamp": "2025-11-29T19:35:15.649Z"
+      },
+      {
+        "sender": "user",
+        "text": "Done Selecting",
+        "timestamp": "2025-11-29T19:35:20.390Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Can the patient walk independently?",
+        "timestamp": "2025-11-29T19:35:20.407Z"
+      },
+      {
+        "sender": "user",
+        "text": "Yes",
+        "timestamp": "2025-11-29T19:35:22.523Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What level of assistance does the patient need for walking?",
+        "timestamp": "2025-11-29T19:35:22.538Z"
+      },
+      {
+        "sender": "user",
+        "text": "Independent",
+        "timestamp": "2025-11-29T19:35:25.451Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Has the patient had any falls in the last 6 months?",
+        "timestamp": "2025-11-29T19:35:25.470Z"
+      },
+      {
+        "sender": "user",
+        "text": "No",
+        "timestamp": "2025-11-29T19:35:28.018Z"
+      },
+      {
+        "sender": "bot",
+        "text": "How did you hear about Keka Rehab Services?",
+        "timestamp": "2025-11-29T19:35:28.027Z"
+      },
+      {
+        "sender": "user",
+        "text": "Other",
+        "timestamp": "2025-11-29T19:35:31.077Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Almost done! What is the patient's primary insurance provider?",
+        "timestamp": "2025-11-29T19:35:31.095Z"
+      },
+      {
+        "sender": "user",
+        "text": "bcbs",
+        "timestamp": "2025-11-29T19:35:37.132Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What is the insurance member ID or policy number?",
+        "timestamp": "2025-11-29T19:35:37.148Z"
+      },
+      {
+        "sender": "user",
+        "text": "1234567",
+        "timestamp": "2025-11-29T19:35:42.044Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Is there a secondary insurance?",
+        "timestamp": "2025-11-29T19:35:42.062Z"
+      },
+      {
+        "sender": "user",
+        "text": "none",
+        "timestamp": "2025-11-29T19:35:46.640Z"
+      },
+      {
+        "sender": "bot",
+        "text": "If different from the patient, who is the responsible party for billing?",
+        "timestamp": "2025-11-29T19:35:46.657Z"
+      },
+      {
+        "sender": "user",
+        "text": "none",
+        "timestamp": "2025-11-29T19:35:49.624Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Final question! Is this care request for you or a loved one?",
+        "timestamp": "2025-11-29T19:35:49.645Z"
+      },
+      {
+        "sender": "user",
+        "text": "For Me",
+        "timestamp": "2025-11-29T19:35:54.515Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What care setting would work best?",
+        "timestamp": "2025-11-29T19:35:54.530Z"
+      },
+      {
+        "sender": "user",
+        "text": "In-Home",
+        "timestamp": "2025-11-29T19:35:56.174Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Great! You've selected In-Home Care.\n\nYou're all set! Please review your information and click the button below to submit your intake form. Our team will contact you within 1-2 business days.",
+        "timestamp": "2025-11-29T19:35:56.195Z"
+      }
+    ],
+    "topic": "patient_intake",
+    "session_id": "8868cf65-d0ae-46db-95b7-1168143f21c1",
+    "date_of_birth": "06/14/1990",
+    "gender": "female",
+    "address_street": "108 Casey St",
+    "address_city": "Norwood",
+    "address_state": "MA",
+    "address_zip": "02062",
+    "emergency_contact_name": "Gene Casey",
+    "emergency_contact_relationship": "Husband",
+    "emergency_contact_phone": "(617) 906-5893",
+    "primary_diagnosis": "none",
+    "secondary_conditions": "na",
+    "allergies": "na",
+    "physician_name": "Dr.Smith",
+    "physician_contact": "6179658970",
+    "assistive_devices": [
+      "none"
+    ],
+    "services_requested": [
+      "nursing"
+    ],
+    "can_walk_independently": "yes",
+    "assistance_level": "independent",
+    "fall_history": "no",
+    "referral_source": "other",
+    "primary_insurance": "bcbs",
+    "insurance_member_id": "1234567",
+    "secondary_insurance": "none",
+    "responsible_party": "none",
+    "care_for": "self",
+    "care_setting": "in_home",
+    "timestamp": "2025-11-29T19:35:58.399Z",
+    "id": "aab5506a-6801-42d3-8740-1bc58045e6ce"
+  },
+  {
+    "service_type": "staffing_employment",
+    "contact_name": "Sandra Casey",
+    "contact_type": "phone",
+    "contact_value": "(617) 953-0639",
+    "chat_transcript": [
+      {
+        "sender": "bot",
+        "text": "Welcome to Keka Rehab Services. How can we help you today?",
+        "timestamp": "2025-11-29T19:34:15.913Z"
+      },
+      {
+        "sender": "user",
+        "text": "🏥 Patient / Client Intake",
+        "timestamp": "2025-11-29T19:34:18.189Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Let's get started with your care request. What's your name?",
+        "timestamp": "2025-11-29T19:34:18.199Z"
+      },
+      {
+        "sender": "user",
+        "text": "Sandra Casey",
+        "timestamp": "2025-11-29T19:34:20.523Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Thank you! How would you like us to reach you?",
+        "timestamp": "2025-11-29T19:34:20.551Z"
+      },
+      {
+        "sender": "user",
+        "text": "Phone",
+        "timestamp": "2025-11-29T19:34:22.114Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Please enter your phone number:",
+        "timestamp": "2025-11-29T19:34:22.123Z"
+      },
+      {
+        "sender": "user",
+        "text": "(617) 953-0639",
+        "timestamp": "2025-11-29T19:34:25.583Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Thank you! Now let's collect some basic information. What is the patient's date of birth?",
+        "timestamp": "2025-11-29T19:34:25.594Z"
+      },
+      {
+        "sender": "user",
+        "text": "06/14/1990",
+        "timestamp": "2025-11-29T19:34:29.523Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Thank you! What is the patient's gender?",
+        "timestamp": "2025-11-29T19:34:29.536Z"
+      },
+      {
+        "sender": "user",
+        "text": "Female",
+        "timestamp": "2025-11-29T19:34:30.823Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Great! Now, what is the patient's street address?",
+        "timestamp": "2025-11-29T19:34:30.837Z"
+      },
+      {
+        "sender": "user",
+        "text": "108 Casey St",
+        "timestamp": "2025-11-29T19:34:34.015Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What city?",
+        "timestamp": "2025-11-29T19:34:34.026Z"
+      },
+      {
+        "sender": "user",
+        "text": "Norwood",
+        "timestamp": "2025-11-29T19:34:37.856Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What state?",
+        "timestamp": "2025-11-29T19:34:37.862Z"
+      },
+      {
+        "sender": "user",
+        "text": "MA",
+        "timestamp": "2025-11-29T19:34:40.781Z"
+      },
+      {
+        "sender": "bot",
+        "text": "And the ZIP code?",
+        "timestamp": "2025-11-29T19:34:40.793Z"
+      },
+      {
+        "sender": "user",
+        "text": "02062",
+        "timestamp": "2025-11-29T19:34:43.873Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Perfect! Now, who should we contact in case of an emergency? What is their name?",
+        "timestamp": "2025-11-29T19:34:43.884Z"
+      },
+      {
+        "sender": "user",
+        "text": "Gene Casey",
+        "timestamp": "2025-11-29T19:34:47.164Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What is their relationship to the patient?",
+        "timestamp": "2025-11-29T19:34:47.171Z"
+      },
+      {
+        "sender": "user",
+        "text": "Husband",
+        "timestamp": "2025-11-29T19:34:50.201Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What is their phone number?",
+        "timestamp": "2025-11-29T19:34:50.218Z"
+      },
+      {
+        "sender": "user",
+        "text": "(617) 906-5893",
+        "timestamp": "2025-11-29T19:34:52.956Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Now for some medical information. What is the primary diagnosis or reason for referral?",
+        "timestamp": "2025-11-29T19:34:52.967Z"
+      },
+      {
+        "sender": "user",
+        "text": "none",
+        "timestamp": "2025-11-29T19:34:55.947Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Are there any secondary conditions we should know about?",
+        "timestamp": "2025-11-29T19:34:55.958Z"
+      },
+      {
+        "sender": "user",
+        "text": "na",
+        "timestamp": "2025-11-29T19:34:59.061Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Does the patient have any allergies?",
+        "timestamp": "2025-11-29T19:34:59.075Z"
+      },
+      {
+        "sender": "user",
+        "text": "na",
+        "timestamp": "2025-11-29T19:35:01.957Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Who is the patient's primary physician or provider?",
+        "timestamp": "2025-11-29T19:35:01.972Z"
+      },
+      {
+        "sender": "user",
+        "text": "Dr.Smith",
+        "timestamp": "2025-11-29T19:35:05.674Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What is the physician's contact information?",
+        "timestamp": "2025-11-29T19:35:05.688Z"
+      },
+      {
+        "sender": "user",
+        "text": "6179658970",
+        "timestamp": "2025-11-29T19:35:08.890Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Does the patient currently use any assistive devices? (Select all that apply)",
+        "timestamp": "2025-11-29T19:35:08.903Z"
+      },
+      {
+        "sender": "user",
+        "text": "None",
+        "timestamp": "2025-11-29T19:35:10.327Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What services is the patient requesting? (Select all that apply)",
+        "timestamp": "2025-11-29T19:35:10.341Z"
+      },
+      {
+        "sender": "user",
+        "text": "Skilled Nursing",
+        "timestamp": "2025-11-29T19:35:15.640Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Added: nursing. Select more or click \"Done Selecting\"",
+        "timestamp": "2025-11-29T19:35:15.649Z"
+      },
+      {
+        "sender": "user",
+        "text": "Done Selecting",
+        "timestamp": "2025-11-29T19:35:20.390Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Can the patient walk independently?",
+        "timestamp": "2025-11-29T19:35:20.407Z"
+      },
+      {
+        "sender": "user",
+        "text": "Yes",
+        "timestamp": "2025-11-29T19:35:22.523Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What level of assistance does the patient need for walking?",
+        "timestamp": "2025-11-29T19:35:22.538Z"
+      },
+      {
+        "sender": "user",
+        "text": "Independent",
+        "timestamp": "2025-11-29T19:35:25.451Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Has the patient had any falls in the last 6 months?",
+        "timestamp": "2025-11-29T19:35:25.470Z"
+      },
+      {
+        "sender": "user",
+        "text": "No",
+        "timestamp": "2025-11-29T19:35:28.018Z"
+      },
+      {
+        "sender": "bot",
+        "text": "How did you hear about Keka Rehab Services?",
+        "timestamp": "2025-11-29T19:35:28.027Z"
+      },
+      {
+        "sender": "user",
+        "text": "Other",
+        "timestamp": "2025-11-29T19:35:31.077Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Almost done! What is the patient's primary insurance provider?",
+        "timestamp": "2025-11-29T19:35:31.095Z"
+      },
+      {
+        "sender": "user",
+        "text": "bcbs",
+        "timestamp": "2025-11-29T19:35:37.132Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What is the insurance member ID or policy number?",
+        "timestamp": "2025-11-29T19:35:37.148Z"
+      },
+      {
+        "sender": "user",
+        "text": "1234567",
+        "timestamp": "2025-11-29T19:35:42.044Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Is there a secondary insurance?",
+        "timestamp": "2025-11-29T19:35:42.062Z"
+      },
+      {
+        "sender": "user",
+        "text": "none",
+        "timestamp": "2025-11-29T19:35:46.640Z"
+      },
+      {
+        "sender": "bot",
+        "text": "If different from the patient, who is the responsible party for billing?",
+        "timestamp": "2025-11-29T19:35:46.657Z"
+      },
+      {
+        "sender": "user",
+        "text": "none",
+        "timestamp": "2025-11-29T19:35:49.624Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Final question! Is this care request for you or a loved one?",
+        "timestamp": "2025-11-29T19:35:49.645Z"
+      },
+      {
+        "sender": "user",
+        "text": "For Me",
+        "timestamp": "2025-11-29T19:35:54.515Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What care setting would work best?",
+        "timestamp": "2025-11-29T19:35:54.530Z"
+      },
+      {
+        "sender": "user",
+        "text": "In-Home",
+        "timestamp": "2025-11-29T19:35:56.174Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Great! You've selected In-Home Care.\n\nYou're all set! Please review your information and click the button below to submit your intake form. Our team will contact you within 1-2 business days.",
+        "timestamp": "2025-11-29T19:35:56.195Z"
+      },
+      {
+        "sender": "user",
+        "text": "Submit Intake Form",
+        "timestamp": "2025-11-29T19:35:58.373Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Thank you! Your request has been submitted. Our team will reach out to you within 1-2 business days to discuss your care needs.\n\nFor urgent questions, call us at (617) 427-8494.",
+        "timestamp": "2025-11-29T19:35:58.409Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Welcome to Keka Rehab Services. How can we help you today?",
+        "timestamp": "2025-11-29T19:36:46.499Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Great! What can Keka help you with regarding Therapy & Rehabilitation:",
+        "timestamp": "2025-11-29T19:36:51.511Z"
+      },
+      {
+        "sender": "user",
+        "text": "What therapy types do you provide?",
+        "timestamp": "2025-11-29T19:36:55.511Z"
+      },
+      {
+        "sender": "bot",
+        "text": "We provide a full spectrum of physical, occupational, and speech therapy tailored to the needs of older adults. Our physical therapy programs restore mobility, improve balance, and reduce pain. Occupational therapy helps with everyday living skills, from dressing and cooking to using adaptive equipment. Speech therapy supports communication challenges and swallowing disorders. Each plan is developed using evidence-based outcome measures and personalized to your unique goals.",
+        "timestamp": "2025-11-29T19:36:55.530Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Welcome to Keka Rehab Services. How can we help you today?",
+        "timestamp": "2025-11-29T19:36:58.431Z"
+      },
+      {
+        "sender": "user",
+        "text": "👩🏾‍⚕️ Staffing & Employment",
+        "timestamp": "2025-11-29T19:37:07.414Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Great! Let's get you connected with our staffing team. What's your name?",
+        "timestamp": "2025-11-29T19:37:07.427Z"
+      },
+      {
+        "sender": "user",
+        "text": "Sandra Casey",
+        "timestamp": "2025-11-29T19:37:11.182Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Thank you! How would you like us to reach you?",
+        "timestamp": "2025-11-29T19:37:11.198Z"
+      },
+      {
+        "sender": "user",
+        "text": "Phone",
+        "timestamp": "2025-11-29T19:37:14.699Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Please enter your phone number:",
+        "timestamp": "2025-11-29T19:37:14.721Z"
+      },
+      {
+        "sender": "user",
+        "text": "(617) 953-0639",
+        "timestamp": "2025-11-29T19:37:19.437Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Perfect! What role are you interested in?",
+        "timestamp": "2025-11-29T19:37:19.453Z"
+      },
+      {
+        "sender": "user",
+        "text": "RN",
+        "timestamp": "2025-11-29T19:37:23.625Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Great! Please provide your license number and state (e.g., \"MA12345 - Massachusetts\"). If you don't have a license yet, click \"I don't have a license\".",
+        "timestamp": "2025-11-29T19:37:23.643Z"
+      },
+      {
+        "sender": "user",
+        "text": "MA1234",
+        "timestamp": "2025-11-29T19:37:28.723Z"
+      },
+      {
+        "sender": "bot",
+        "text": "How many years of experience do you have?",
+        "timestamp": "2025-11-29T19:37:28.740Z"
+      },
+      {
+        "sender": "user",
+        "text": "1-3 years",
+        "timestamp": "2025-11-29T19:37:30.659Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Which area would you prefer to work in?",
+        "timestamp": "2025-11-29T19:37:30.674Z"
+      },
+      {
+        "sender": "user",
+        "text": "Boston",
+        "timestamp": "2025-11-29T19:37:34.486Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What's your availability?",
+        "timestamp": "2025-11-29T19:37:34.509Z"
+      },
+      {
+        "sender": "user",
+        "text": "Full-time",
+        "timestamp": "2025-11-29T19:37:36.278Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Do you have reliable transportation?",
+        "timestamp": "2025-11-29T19:37:36.301Z"
+      },
+      {
+        "sender": "user",
+        "text": "Yes",
+        "timestamp": "2025-11-29T19:37:38.794Z"
+      },
+      {
+        "sender": "bot",
+        "text": "By clicking \"I Agree\", you authorize Keka Rehab Services to contact you regarding staffing opportunities.",
+        "timestamp": "2025-11-29T19:37:38.816Z"
+      },
+      {
+        "sender": "user",
+        "text": "I Agree",
+        "timestamp": "2025-11-29T19:37:40.620Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Perfect! You're all set! Please review your information and click the button below to submit your application. Our staffing coordinator will contact you soon about available positions.",
+        "timestamp": "2025-11-29T19:37:40.641Z"
+      }
+    ],
+    "topic": "staffing_employment",
+    "session_id": "8868cf65-d0ae-46db-95b7-1168143f21c1",
+    "discipline": "rn",
+    "license_number": "MA1234",
+    "license_state": "Not specified",
+    "years_experience": "1_to_3",
+    "preferred_work_area": "boston",
+    "availability": "full_time",
+    "has_transportation": true,
+    "consent_given": true,
+    "timestamp": "2025-11-29T19:37:45.299Z",
+    "id": "5985a8e5-e5c2-4302-9ab5-443b9c87232c"
+  },
+  {
+    "service_type": "staffing_employment",
+    "contact_name": "Sandra Casey",
+    "contact_type": "phone",
+    "contact_value": "(617) 953-0639",
+    "chat_transcript": [
+      {
+        "sender": "bot",
+        "text": "Welcome to Keka Rehab Services. How can we help you today?",
+        "timestamp": "2025-11-29T19:38:22.207Z"
+      },
+      {
+        "sender": "user",
+        "text": "👩🏾‍⚕️ Staffing & Employment",
+        "timestamp": "2025-11-29T19:38:24.922Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Great! Let's get you connected with our staffing team. What's your name?",
+        "timestamp": "2025-11-29T19:38:24.934Z"
+      },
+      {
+        "sender": "user",
+        "text": "Sandra Casey",
+        "timestamp": "2025-11-29T19:38:27.469Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Thank you! How would you like us to reach you?",
+        "timestamp": "2025-11-29T19:38:27.474Z"
+      },
+      {
+        "sender": "user",
+        "text": "Phone",
+        "timestamp": "2025-11-29T19:38:29.085Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Please enter your phone number:",
+        "timestamp": "2025-11-29T19:38:29.090Z"
+      },
+      {
+        "sender": "user",
+        "text": "(617) 953-0639",
+        "timestamp": "2025-11-29T19:38:32.550Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Perfect! What role are you interested in?",
+        "timestamp": "2025-11-29T19:38:32.561Z"
+      },
+      {
+        "sender": "user",
+        "text": "RN",
+        "timestamp": "2025-11-29T19:38:34.224Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Great! Please provide your license number and state (e.g., \"MA12345 - Massachusetts\"). If you don't have a license yet, click \"I don't have a license\".",
+        "timestamp": "2025-11-29T19:38:34.231Z"
+      },
+      {
+        "sender": "user",
+        "text": "MA1234",
+        "timestamp": "2025-11-29T19:38:37.998Z"
+      },
+      {
+        "sender": "bot",
+        "text": "How many years of experience do you have?",
+        "timestamp": "2025-11-29T19:38:38.003Z"
+      },
+      {
+        "sender": "user",
+        "text": "10+ years",
+        "timestamp": "2025-11-29T19:38:40.799Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Which area would you prefer to work in?",
+        "timestamp": "2025-11-29T19:38:40.810Z"
+      },
+      {
+        "sender": "user",
+        "text": "Boston",
+        "timestamp": "2025-11-29T19:38:43.665Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What's your availability?",
+        "timestamp": "2025-11-29T19:38:43.680Z"
+      },
+      {
+        "sender": "user",
+        "text": "Full-time",
+        "timestamp": "2025-11-29T19:38:45.617Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Do you have reliable transportation?",
+        "timestamp": "2025-11-29T19:38:45.630Z"
+      },
+      {
+        "sender": "user",
+        "text": "Yes",
+        "timestamp": "2025-11-29T19:38:47.203Z"
+      },
+      {
+        "sender": "bot",
+        "text": "By clicking \"I Agree\", you authorize Keka Rehab Services to contact you regarding staffing opportunities.",
+        "timestamp": "2025-11-29T19:38:47.211Z"
+      },
+      {
+        "sender": "user",
+        "text": "I Agree",
+        "timestamp": "2025-11-29T19:38:48.485Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Perfect! You're all set! Please review your information and click the button below to submit your application. Our staffing coordinator will contact you soon about available positions.",
+        "timestamp": "2025-11-29T19:38:48.492Z"
+      }
+    ],
+    "topic": "staffing_employment",
+    "session_id": "1eac47e0-8dd1-4fa1-b2ee-7f0fce1af4ba",
+    "discipline": "rn",
+    "license_number": "MA1234",
+    "license_state": "Not specified",
+    "years_experience": "10_plus",
+    "preferred_work_area": "boston",
+    "availability": "full_time",
+    "has_transportation": true,
+    "consent_given": true,
+    "timestamp": "2025-11-29T19:38:49.614Z",
+    "id": "f10dae05-190c-4809-8619-95e8ce56d5cc"
+  },
+  {
+    "service_type": "staffing_employment",
+    "contact_name": "Sandra Casey",
+    "contact_type": "phone",
+    "contact_value": "(617) 953-0639",
+    "chat_transcript": [
+      {
+        "sender": "bot",
+        "text": "Welcome to Keka Rehab Services. How can we help you today?",
+        "timestamp": "2025-11-29T19:44:27.391Z"
+      },
+      {
+        "sender": "user",
+        "text": "👩🏾‍⚕️ Staffing & Employment",
+        "timestamp": "2025-11-29T19:44:31.826Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Great! Let's get you connected with our staffing team. What's your name?",
+        "timestamp": "2025-11-29T19:44:31.837Z"
+      },
+      {
+        "sender": "user",
+        "text": "Sandra Casey",
+        "timestamp": "2025-11-29T19:44:34.462Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Thank you! How would you like us to reach you?",
+        "timestamp": "2025-11-29T19:44:34.475Z"
+      },
+      {
+        "sender": "user",
+        "text": "Phone",
+        "timestamp": "2025-11-29T19:44:35.778Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Please enter your phone number:",
+        "timestamp": "2025-11-29T19:44:35.785Z"
+      },
+      {
+        "sender": "user",
+        "text": "(617) 953-0639",
+        "timestamp": "2025-11-29T19:44:40.047Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Perfect! What role are you interested in?",
+        "timestamp": "2025-11-29T19:44:40.055Z"
+      },
+      {
+        "sender": "user",
+        "text": "RN",
+        "timestamp": "2025-11-29T19:44:41.771Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Great! Please provide your license number and state (e.g., \"MA12345 - Massachusetts\"). If you don't have a license yet, click \"I don't have a license\".",
+        "timestamp": "2025-11-29T19:44:41.779Z"
+      },
+      {
+        "sender": "user",
+        "text": "MA1234",
+        "timestamp": "2025-11-29T19:44:45.011Z"
+      },
+      {
+        "sender": "bot",
+        "text": "How many years of experience do you have?",
+        "timestamp": "2025-11-29T19:44:45.017Z"
+      },
+      {
+        "sender": "user",
+        "text": "10+ years",
+        "timestamp": "2025-11-29T19:44:47.405Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Which area would you prefer to work in?",
+        "timestamp": "2025-11-29T19:44:47.416Z"
+      },
+      {
+        "sender": "user",
+        "text": "Boston",
+        "timestamp": "2025-11-29T19:44:49.054Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What's your availability?",
+        "timestamp": "2025-11-29T19:44:49.065Z"
+      },
+      {
+        "sender": "user",
+        "text": "Full-time",
+        "timestamp": "2025-11-29T19:44:50.578Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Do you have reliable transportation?",
+        "timestamp": "2025-11-29T19:44:50.587Z"
+      },
+      {
+        "sender": "user",
+        "text": "Yes",
+        "timestamp": "2025-11-29T19:44:52.445Z"
+      },
+      {
+        "sender": "bot",
+        "text": "By clicking \"I Agree\", you authorize Keka Rehab Services to contact you regarding staffing opportunities.",
+        "timestamp": "2025-11-29T19:44:52.456Z"
+      },
+      {
+        "sender": "user",
+        "text": "I Agree",
+        "timestamp": "2025-11-29T19:44:53.587Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Perfect! You're all set! Please review your information and click the button below to submit your application. Our staffing coordinator will contact you soon about available positions.",
+        "timestamp": "2025-11-29T19:44:53.601Z"
+      }
+    ],
+    "topic": "staffing_employment",
+    "session_id": "153239fe-3a3d-4a0e-a7d3-177ea404343a",
+    "discipline": "rn",
+    "license_number": "MA1234",
+    "license_state": "Not specified",
+    "years_experience": "10_plus",
+    "preferred_work_area": "boston",
+    "availability": "full_time",
+    "has_transportation": true,
+    "consent_given": true,
+    "timestamp": "2025-11-29T19:44:54.656Z",
+    "id": "4252d4ca-2e88-4651-be90-31363a4f9fe0"
+  },
+  {
+    "service_type": "accreditation_consulting",
+    "contact_name": "Sandra Casey",
+    "contact_type": "email",
+    "contact_value": "sandra.abago@gmail.com",
+    "chat_transcript": [
+      {
+        "sender": "bot",
+        "text": "Welcome to Keka Rehab Services. How can we help you today?",
+        "timestamp": "2025-11-29T20:55:48.311Z"
+      },
+      {
+        "sender": "user",
+        "text": "📊 Accreditation & Consulting",
+        "timestamp": "2025-11-29T20:55:50.934Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Welcome! Let's connect you with our accreditation and consulting team. What's your name?",
+        "timestamp": "2025-11-29T20:55:50.946Z"
+      },
+      {
+        "sender": "user",
+        "text": "Sandra Casey",
+        "timestamp": "2025-11-29T20:55:53.925Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Thank you! How would you like us to reach you?",
+        "timestamp": "2025-11-29T20:55:53.938Z"
+      },
+      {
+        "sender": "user",
+        "text": "Email",
+        "timestamp": "2025-11-29T20:55:55.141Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Please enter your email address:",
+        "timestamp": "2025-11-29T20:55:55.151Z"
+      },
+      {
+        "sender": "user",
+        "text": "sandra.abago@gmail.com",
+        "timestamp": "2025-11-29T20:55:57.494Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Great! What's your business or agency name?",
+        "timestamp": "2025-11-29T20:55:57.500Z"
+      },
+      {
+        "sender": "user",
+        "text": "Ugabot",
+        "timestamp": "2025-11-29T20:56:00.966Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Thank you! Where is your business located? (City, State)",
+        "timestamp": "2025-11-29T20:56:00.977Z"
+      },
+      {
+        "sender": "user",
+        "text": "Norwood, MA",
+        "timestamp": "2025-11-29T20:56:04.492Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What type of support do you need? (You can select multiple)",
+        "timestamp": "2025-11-29T20:56:04.504Z"
+      },
+      {
+        "sender": "user",
+        "text": "Accreditation",
+        "timestamp": "2025-11-29T20:56:05.782Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Selected: 1 type(s). Select more or click \"Done Selecting\" to continue.",
+        "timestamp": "2025-11-29T20:56:05.788Z"
+      },
+      {
+        "sender": "user",
+        "text": "Done Selecting",
+        "timestamp": "2025-11-29T20:56:06.751Z"
+      },
+      {
+        "sender": "bot",
+        "text": "What's your current agency status?",
+        "timestamp": "2025-11-29T20:56:06.766Z"
+      },
+      {
+        "sender": "user",
+        "text": "New / Pre-licensing",
+        "timestamp": "2025-11-29T20:56:07.941Z"
+      },
+      {
+        "sender": "bot",
+        "text": "When would you like to start? (e.g., \"Immediately\", \"Next month\", \"Q2 2025\")",
+        "timestamp": "2025-11-29T20:56:07.948Z"
+      },
+      {
+        "sender": "user",
+        "text": "Immediately",
+        "timestamp": "2025-11-29T20:56:08.982Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Do you have any additional questions or details you'd like to share? (Type your message or click \"Skip\")",
+        "timestamp": "2025-11-29T20:56:08.993Z"
+      },
+      {
+        "sender": "user",
+        "text": "none",
+        "timestamp": "2025-11-29T20:56:12.237Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Perfect! You're all set! Please review your information and click the button below to submit your request. Our accreditation and consulting team will contact you within 1-2 business days.",
+        "timestamp": "2025-11-29T20:56:12.244Z"
+      }
+    ],
+    "topic": "accreditation_consulting",
+    "session_id": "1d6211d8-4304-492b-bbd8-ea335cfef673",
+    "business_name": "Ugabot",
+    "business_location": "Norwood, MA",
+    "support_types": [
+      "accreditation"
+    ],
+    "agency_status": "new_prelicensing",
+    "preferred_start_date": "immediately",
+    "notes_accreditation": "none",
+    "timestamp": "2025-11-29T20:57:12.250Z",
+    "id": "ecca0430-50ee-4263-a319-540378128b00"
   }
 ]
