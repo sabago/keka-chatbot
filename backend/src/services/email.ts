@@ -834,7 +834,15 @@ export async function sendAdminNotificationEmail(notification: ContactNotificati
   }
 
   try {
-    const adminEmail = 'scasey@ugabot.com';
+    // Use ADMIN_EMAIL env variable, fallback to HANDOFF_EMAIL
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.HANDOFF_EMAIL;
+
+    if (!adminEmail) {
+      logger.error('admin_email_not_configured', {
+        message: 'Neither ADMIN_EMAIL nor HANDOFF_EMAIL environment variable is set',
+      });
+      return false;
+    }
 
     // Service type labels
     const serviceTypeMap: Record<string, string> = {

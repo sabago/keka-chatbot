@@ -58,7 +58,7 @@ async function getConcurrentStats(startDate: Date, endDate: Date): Promise<{
   peak_concurrent: number;
   peak_time: string | null;
   avg_concurrent: number;
-  busiest_hour: number;
+  busiest_hour: number | null;
 }> {
   try {
     const pool = getPool();
@@ -183,11 +183,15 @@ async function getConcurrentStats(startDate: Date, endDate: Date): Promise<{
       ) sub;
     `, [startDate, endDate]);
 
+    // Check if there's meaningful data for busiest hour
+    const hasMeaningfulData = hourlyResult.rows[0]?.max_concurrent &&
+                              parseFloat(hourlyResult.rows[0].max_concurrent) > 0;
+
     return {
       peak_concurrent: parseInt(peakResult.rows[0]?.peak_concurrent || '0'),
       peak_time: peakResult.rows[0]?.peak_time,
       avg_concurrent: parseFloat(avgResult.rows[0]?.overall_avg || '0'),
-      busiest_hour: parseInt(hourlyResult.rows[0]?.hour_of_day || '0'),
+      busiest_hour: hasMeaningfulData ? parseInt(hourlyResult.rows[0].hour_of_day) : null,
     };
   } catch (error) {
     logger.error('get_concurrent_stats_failed', { error: String(error) });
@@ -195,7 +199,7 @@ async function getConcurrentStats(startDate: Date, endDate: Date): Promise<{
       peak_concurrent: 0,
       peak_time: null,
       avg_concurrent: 0,
-      busiest_hour: 0,
+      busiest_hour: null,
     };
   }
 }
@@ -237,7 +241,9 @@ async function generateWeeklyReportHTML(): Promise<string> {
 
     // Format busiest hour
     const busiestHour = concurrentStats.busiest_hour;
-    const busiestHourFormatted = `${busiestHour}:00 - ${(busiestHour + 1) % 24}:00`;
+    const busiestHourFormatted = busiestHour !== null
+      ? `${busiestHour}:00 - ${(busiestHour + 1) % 24}:00`
+      : 'N/A';
 
     // Calculate previous week metrics for comparison (if needed)
     // For now, we'll just show current week metrics
@@ -379,7 +385,7 @@ async function generateWeeklyReportHTML(): Promise<string> {
     </div>
     <div class="metric-card">
       <div class="metric-label">Busiest Hour</div>
-      <div class="metric-value">${busiestHour}:00</div>
+      <div class="metric-value">${busiestHour !== null ? `${busiestHour}:00` : 'N/A'}</div>
       <p style="font-size: 12px; color: #666; margin-top: 5px;">
         ${busiestHourFormatted}
       </p>
@@ -392,7 +398,7 @@ async function generateWeeklyReportHTML(): Promise<string> {
     <strong>📊 High Engagement:</strong> Peak concurrent usage of ${concurrentStats.peak_concurrent} users indicates strong chatbot adoption!
   </div>
   `
-      : concurrentStats.peak_concurrent > 0
+      : concurrentStats.peak_concurrent > 0 && busiestHour !== null
       ? `
   <div style="background-color: #e7f3ff; border-left: 4px solid #0066cc; padding: 15px; margin: 20px 0; border-radius: 4px;">
     <strong>💡 Insight:</strong> Average concurrent usage is ${concurrentStats.avg_concurrent.toFixed(1)} users. Consider promoting the chatbot during ${busiestHourFormatted} when engagement is highest.
