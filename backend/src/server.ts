@@ -19,6 +19,11 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
+// Parse allowed embed domains from environment variable
+const ALLOWED_EMBED_DOMAINS = process.env.ALLOWED_EMBED_DOMAINS
+  ? process.env.ALLOWED_EMBED_DOMAINS.split(',').map(d => d.trim())
+  : ['https://kekarehabservices.com', 'https://www.kekarehabservices.com'];
+
 // Trust proxy - Required for Railway/reverse proxy deployments
 // This allows Express to read X-Forwarded-* headers correctly
 app.set('trust proxy', true);
@@ -36,6 +41,7 @@ app.use(helmet({
       objectSrc: ["'none'"],
       mediaSrc: ["'self'"],
       frameSrc: ["'none'"],
+      frameAncestors: ["'self'", ...ALLOWED_EMBED_DOMAINS],
     },
   },
   hsts: {
