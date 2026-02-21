@@ -21,14 +21,26 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 // Parse allowed embed domains from environment variable
 const ALLOWED_EMBED_DOMAINS = process.env.ALLOWED_EMBED_DOMAINS
-  ? process.env.ALLOWED_EMBED_DOMAINS.split(',').map(d => d.trim())
+  ? process.env.ALLOWED_EMBED_DOMAINS.split(',').map(d => d.trim()).filter(d => d.length > 0)
   : ['https://kekarehabservices.com', 'https://www.kekarehabservices.com'];
+
+// Log the allowed domains on startup
+logger.info('server_config', {
+  allowed_embed_domains: ALLOWED_EMBED_DOMAINS,
+  count: ALLOWED_EMBED_DOMAINS.length
+});
 
 // Trust proxy - Required for Railway/reverse proxy deployments
 // This allows Express to read X-Forwarded-* headers correctly
 app.set('trust proxy', true);
 
 // Security: Helmet with CSP
+// Ensure frameAncestors array is valid (non-empty after adding 'self')
+const frameAncestorsDirective = ["'self'"];
+if (ALLOWED_EMBED_DOMAINS && ALLOWED_EMBED_DOMAINS.length > 0) {
+  frameAncestorsDirective.push(...ALLOWED_EMBED_DOMAINS);
+}
+
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -41,7 +53,7 @@ app.use(helmet({
       objectSrc: ["'none'"],
       mediaSrc: ["'self'"],
       frameSrc: ["'none'"],
-      frameAncestors: ["'self'", ...ALLOWED_EMBED_DOMAINS],
+      frameAncestors: frameAncestorsDirective,
     },
   },
   hsts: {
