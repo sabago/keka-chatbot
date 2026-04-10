@@ -730,16 +730,19 @@ export async function sendContactNotification(notification: ContactNotification)
 
     // Validate required environment variables
     const fromEmail = process.env.SES_FROM_EMAIL;
-    const handoffEmail = process.env.HANDOFF_EMAIL;
+    const handoffEmailRaw = process.env.HANDOFF_EMAIL;
 
-    if (!fromEmail || !handoffEmail) {
+    if (!fromEmail || !handoffEmailRaw) {
       logger.error('email_config_missing', {
         has_from: !!fromEmail,
-        has_handoff_email: !!handoffEmail,
+        has_handoff_email: !!handoffEmailRaw,
         is_development: isDevelopment,
       });
       return false;
     }
+
+    // Support comma-separated list of BCC recipients
+    const bccAddresses = handoffEmailRaw.split(',').map(e => e.trim()).filter(Boolean);
 
     // Generate email content using helper functions
     const htmlBody = generateEmailHTML(notification);
@@ -751,14 +754,14 @@ export async function sendContactNotification(notification: ContactNotification)
       logger.info('email_notification_dev', {
         service_type: notification.serviceType,
         contact_type: notification.contactType,
-        handoff_email: handoffEmail,
+        bcc_count: bccAddresses.length,
       });
 
       console.log('\n' + '='.repeat(80));
       console.log('📧 EMAIL NOTIFICATION (DEVELOPMENT MODE - NOT ACTUALLY SENT)');
       console.log('='.repeat(80));
       console.log(`From: ${fromEmail}`);
-      console.log(`To: ${handoffEmail}`);
+      console.log(`BCC: ${bccAddresses.join(', ')}`);
       console.log(`Subject: ${subject}`);
       console.log('-'.repeat(80));
       console.log('TEXT VERSION:');
@@ -781,7 +784,8 @@ export async function sendContactNotification(notification: ContactNotification)
     const command = new SendEmailCommand({
       Source: fromEmail,
       Destination: {
-        ToAddresses: [handoffEmail],
+        ToAddresses: [fromEmail],
+        BccAddresses: bccAddresses,
       },
       Message: {
         Subject: {
@@ -806,7 +810,7 @@ export async function sendContactNotification(notification: ContactNotification)
 
     logger.info('email_notification_sent', {
       message_id: response.MessageId,
-      handoff_email: handoffEmail,
+      bcc_count: bccAddresses.length,
       contact_type: notification.contactType,
       service_type: notification.serviceType,
     });
