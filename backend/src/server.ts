@@ -20,9 +20,14 @@ const PORT = process.env.PORT || 3001;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 // Parse allowed embed domains from environment variable
+// Note: frame-ancestors directive uses scheme-source format (includes https://)
 const ALLOWED_EMBED_DOMAINS = process.env.ALLOWED_EMBED_DOMAINS
   ? process.env.ALLOWED_EMBED_DOMAINS.split(',').map(d => d.trim()).filter(d => d.length > 0)
-  : ['https://kekarehabservices.com', 'https://www.kekarehabservices.com'];
+  : [
+      'kekarehabservices.com',
+      'www.kekarehabservices.com',
+      'saddlebrown-grouse-469515.hostingersite.com'  // Hostinger staging site
+    ];
 
 // Log the allowed domains on startup
 logger.info('server_config', {
