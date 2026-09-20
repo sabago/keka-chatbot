@@ -625,7 +625,7 @@ export async function handleChatMessage(request: ChatRequest, ipHash: string): P
     });
 
     return {
-      text: 'Please do not share medical details, diagnosis, medications, or personal health information. For your privacy and security, contact us directly at (857)345-9589or visit kekarehabservices.com/contact-us/ to discuss your needs.',
+      text: 'Please do not share medical details, diagnosis, medications, or personal health information. For your privacy and security, contact us directly at (857)345-9589 or visit kekarehabservices.com/contact-us/ to discuss your needs.',
       buttons: addNavigationButtons([], session_data),
       next_state: 'awaiting_user_choice',
       session_data: {
