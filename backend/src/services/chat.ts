@@ -3,7 +3,7 @@ import { BotResponse, ChatRequest, containsPHI, Button } from '../types/schema';
 import { getHomeScreen, getCategoryButtons, getFAQAnswer, getResolutionButtons } from './faq';
 import { generateRetrievalResponse } from './retrieve';
 import { saveHandoffRequest, validateContact, validateDate, validateDateRange } from './handoff';
-import { sendAdminNotificationEmail } from './email';
+import { sendContactNotification } from './email';
 import { logger } from '../utils/logger';
 import { pushState, popState, canGoBack, clearHistory } from '../utils/stateHistory';
 
@@ -625,7 +625,7 @@ export async function handleChatMessage(request: ChatRequest, ipHash: string): P
     });
 
     return {
-      text: 'Please do not share medical details, diagnosis, medications, or personal health information. For your privacy and security, contact us directly at (617) 427-8494 or visit kekarehabservices.com/contact-us/ to discuss your needs.',
+      text: 'Please do not share medical details, diagnosis, medications, or personal health information. For your privacy and security, contact us directly at (857)345-9589or visit kekarehabservices.com/contact-us/ to discuss your needs.',
       buttons: addNavigationButtons([], session_data),
       next_state: 'awaiting_user_choice',
       session_data: {
@@ -1000,14 +1000,14 @@ function handleAwaitingContact(message: string, sessionData: any): BotResponse {
         sessionId: sessionData?.session_id || 'unknown',
       };
 
-      sendAdminNotificationEmail(notificationData).catch(error => {
+      sendContactNotification(notificationData).catch(error => {
         logger.error('contact_me_email_failed', {
           error: String(error),
         });
       });
 
       return {
-        text: 'Thank you! Our team will reach out to you within 1-2 business days.\n\nFor urgent questions, call us at (617) 427-8494.',
+        text: 'Thank you! Our team will reach out to you within 1-2 business days.\n\nFor urgent questions, call us at (857)345-9589.',
         buttons: addNavigationButtons([], finalSessionData),
         next_state: 'complete',
         session_data: finalSessionData,
@@ -2337,84 +2337,6 @@ async function handleAwaitingSubmitConfirmation(message: string, sessionData: an
   if (choice === 'submit_intake') {
     const serviceType = sessionData.service_type || 'patient_intake';
 
-    // Prepare notification data based on service type
-    const notificationData: any = {
-      serviceType: serviceType,
-      contactName: sessionData.contact_name,
-      contactType: sessionData.contact_type,
-      contactValue: sessionData.contact_value,
-      chatTranscript: sessionData.chat_transcript || [], // Include chat conversation
-      sessionId: sessionId,
-      timestamp: new Date().toISOString(),
-    };
-
-    // Add service-specific fields
-    if (serviceType === 'patient_intake') {
-      Object.assign(notificationData, {
-        dateOfBirth: sessionData.date_of_birth,
-        gender: sessionData.gender,
-        addressStreet: sessionData.address_street,
-        addressCity: sessionData.address_city,
-        addressState: sessionData.address_state,
-        addressZip: sessionData.address_zip,
-        emergencyContactName: sessionData.emergency_contact_name,
-        emergencyContactRelationship: sessionData.emergency_contact_relationship,
-        emergencyContactPhone: sessionData.emergency_contact_phone,
-        primaryDiagnosis: sessionData.primary_diagnosis,
-        secondaryConditions: sessionData.secondary_conditions,
-        allergies: sessionData.allergies,
-        physicianName: sessionData.physician_name,
-        physicianContact: sessionData.physician_contact,
-        assistiveDevices: sessionData.assistive_devices || [],
-        servicesRequested: sessionData.services_requested || [],
-        canWalkIndependently: sessionData.can_walk_independently,
-        assistanceLevel: sessionData.assistance_level,
-        fallHistory: sessionData.fall_history,
-        referralSource: sessionData.referral_source,
-        referralAgency: sessionData.referral_agency,
-        referralContact: sessionData.referral_contact,
-        primaryInsurance: sessionData.primary_insurance,
-        insuranceMemberId: sessionData.insurance_member_id,
-        secondaryInsurance: sessionData.secondary_insurance,
-        responsibleParty: sessionData.responsible_party,
-        careFor: sessionData.care_for,
-        careSetting: sessionData.care_setting,
-      });
-    } else if (serviceType === 'accreditation_consulting') {
-      Object.assign(notificationData, {
-        businessName: sessionData.business_name,
-        businessLocation: sessionData.business_location,
-        supportTypes: sessionData.support_types || [],
-        agencyStatus: sessionData.agency_status,
-        preferredStartDate: sessionData.preferred_start_date,
-        notesAccreditation: sessionData.notes_accreditation,
-      });
-    } else if (serviceType === 'staffing_employment') {
-      Object.assign(notificationData, {
-        discipline: sessionData.discipline,
-        licenseNumber: sessionData.license_number,
-        licenseState: sessionData.license_state,
-        yearsExperience: sessionData.years_experience,
-        preferredWorkArea: sessionData.preferred_work_area,
-        availability: sessionData.availability,
-        hasTransportation: sessionData.has_transportation,
-        consentGiven: sessionData.consent_given,
-      });
-    }
-
-    // Send admin email notification
-    try {
-      logger.info('sending_admin_notification', { service_type: serviceType, session_id: sessionId });
-
-      // Send email notification (SMS disabled per user request)
-      await sendAdminNotificationEmail(notificationData);
-
-      logger.info('admin_notification_sent', { service_type: serviceType, session_id: sessionId });
-    } catch (error) {
-      logger.error('admin_notification_error', { error: String(error), service_type: serviceType });
-      // Continue even if notification fails
-    }
-
     // Save handoff request to file storage
     try {
       const handoffData: any = {
@@ -2491,11 +2413,11 @@ async function handleAwaitingSubmitConfirmation(message: string, sessionData: an
     // Return success message based on service type
     let successMessage = '';
     if (serviceType === 'patient_intake') {
-      successMessage = 'Thank you! Your request has been submitted. Our team will reach out to you within 1-2 business days to discuss your care needs.\n\nFor urgent questions, call us at (617) 427-8494.';
+      successMessage = 'Thank you! Your request has been submitted. Our team will reach out to you within 1-2 business days to discuss your care needs.\n\nFor urgent questions, call us at (857)345-9589.';
     } else if (serviceType === 'accreditation_consulting') {
-      successMessage = 'Thank you! Your request has been submitted. Our accreditation and consulting team will reach out to you within 1-2 business days to discuss your needs.\n\nFor urgent questions, call us at (617) 427-8494.';
+      successMessage = 'Thank you! Your request has been submitted. Our accreditation and consulting team will reach out to you within 1-2 business days to discuss your needs.\n\nFor urgent questions, call us at (857)345-9589.';
     } else if (serviceType === 'staffing_employment') {
-      successMessage = 'Thank you! Your application has been submitted. Our staffing coordinator will review your information and contact you soon about available positions.\n\nFor urgent questions, call us at (617) 427-8494.';
+      successMessage = 'Thank you! Your application has been submitted. Our staffing coordinator will review your information and contact you soon about available positions.\n\nFor urgent questions, call us at (857)345-9589.';
     }
 
     const finalSessionData = {

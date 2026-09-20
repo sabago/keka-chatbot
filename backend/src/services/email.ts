@@ -730,18 +730,19 @@ export async function sendContactNotification(notification: ContactNotification)
 
     // Validate required environment variables
     const fromEmail = process.env.SES_FROM_EMAIL;
-    const handoffEmailRaw = process.env.HANDOFF_EMAIL;
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const handoffEmailRaw = process.env.HANDOFF_EMAIL || '';
 
-    if (!fromEmail || !handoffEmailRaw) {
+    if (!fromEmail || !adminEmail) {
       logger.error('email_config_missing', {
         has_from: !!fromEmail,
-        has_handoff_email: !!handoffEmailRaw,
+        has_admin_email: !!adminEmail,
         is_development: isDevelopment,
       });
       return false;
     }
 
-    // Support comma-separated list of BCC recipients
+    // HANDOFF_EMAIL is optional - supports a comma-separated list of BCC recipients
     const bccAddresses = handoffEmailRaw.split(',').map(e => e.trim()).filter(Boolean);
 
     // Generate email content using helper functions
@@ -754,6 +755,7 @@ export async function sendContactNotification(notification: ContactNotification)
       logger.info('email_notification_dev', {
         service_type: notification.serviceType,
         contact_type: notification.contactType,
+        admin_email: adminEmail,
         bcc_count: bccAddresses.length,
       });
 
@@ -761,6 +763,7 @@ export async function sendContactNotification(notification: ContactNotification)
       console.log('📧 EMAIL NOTIFICATION (DEVELOPMENT MODE - NOT ACTUALLY SENT)');
       console.log('='.repeat(80));
       console.log(`From: ${fromEmail}`);
+      console.log(`To: ${adminEmail}`);
       console.log(`BCC: ${bccAddresses.join(', ')}`);
       console.log(`Subject: ${subject}`);
       console.log('-'.repeat(80));
@@ -784,8 +787,8 @@ export async function sendContactNotification(notification: ContactNotification)
     const command = new SendEmailCommand({
       Source: fromEmail,
       Destination: {
-        ToAddresses: [fromEmail],
-        BccAddresses: bccAddresses,
+        ToAddresses: [adminEmail],
+        ...(bccAddresses.length > 0 && { BccAddresses: bccAddresses }),
       },
       Message: {
         Subject: {
@@ -810,6 +813,7 @@ export async function sendContactNotification(notification: ContactNotification)
 
     logger.info('email_notification_sent', {
       message_id: response.MessageId,
+      admin_email: adminEmail,
       bcc_count: bccAddresses.length,
       contact_type: notification.contactType,
       service_type: notification.serviceType,
@@ -818,129 +822,6 @@ export async function sendContactNotification(notification: ContactNotification)
     return true;
   } catch (error) {
     logger.error('email_notification_failed', {
-      error: String(error),
-      error_name: error instanceof Error ? error.name : 'unknown',
-      contact_type: notification.contactType,
-    });
-    return false;
-  }
-}
-
-// Send admin notification email (always to admin email)
-export async function sendAdminNotificationEmail(notification: ContactNotification): Promise<boolean> {
-  // EARLY GUARD: Development mode - just log and return
-  if (isDevelopment) {
-    logger.info('admin_email_notification_dev_mode', {
-      service_type: notification.serviceType,
-      contact_type: notification.contactType,
-      message: 'Development mode - admin email will be logged to console only',
-    });
-  }
-
-  try {
-    // Use ADMIN_EMAIL env variable, fallback to HANDOFF_EMAIL
-    const adminEmail = process.env.ADMIN_EMAIL || process.env.HANDOFF_EMAIL;
-
-    if (!adminEmail) {
-      logger.error('admin_email_not_configured', {
-        message: 'Neither ADMIN_EMAIL nor HANDOFF_EMAIL environment variable is set',
-      });
-      return false;
-    }
-
-    // Service type labels
-    const serviceTypeMap: Record<string, string> = {
-      'patient_intake': 'Patient / Client Intake',
-      'accreditation_consulting': 'Accreditation & Consulting Support',
-      'staffing_employment': 'Staffing & Employment',
-      'general_inquiry': 'General Contact Request',
-    };
-    const serviceTypeLabel = serviceTypeMap[notification.serviceType] || 'General Inquiry';
-
-    // Validate required environment variables
-    const fromEmail = process.env.SES_FROM_EMAIL;
-
-    if (!fromEmail) {
-      logger.error('admin_email_config_missing', {
-        has_from: !!fromEmail,
-        is_development: isDevelopment,
-      });
-      return false;
-    }
-
-    // Generate email content using helper functions
-    const htmlBody = generateEmailHTML(notification);
-    const textBody = generateEmailText(notification);
-    const subject = `🔔 New ${serviceTypeLabel} Request - ${notification.contactType === 'email' ? 'Email' : 'Phone'}`;
-
-    // Development mode: Just log the email
-    if (isDevelopment) {
-      logger.info('admin_email_notification_dev', {
-        service_type: notification.serviceType,
-        contact_type: notification.contactType,
-        admin_email: adminEmail,
-      });
-
-      console.log('\n' + '='.repeat(80));
-      console.log('📧 ADMIN EMAIL NOTIFICATION (DEVELOPMENT MODE - NOT ACTUALLY SENT)');
-      console.log('='.repeat(80));
-      console.log(`From: ${fromEmail}`);
-      console.log(`To: ${adminEmail}`);
-      console.log(`Subject: ${subject}`);
-      console.log('-'.repeat(80));
-      console.log('TEXT VERSION:');
-      console.log(textBody);
-      console.log('-'.repeat(80));
-      console.log('HTML VERSION (FULL EMAIL TEMPLATE):');
-      console.log(htmlBody);
-      console.log('='.repeat(80) + '\n');
-
-      return true;
-    }
-
-    // Production mode: Send via AWS SES
-    if (!sesClient) {
-      logger.error('ses_client_not_initialized', { error: 'SES client not available in production' });
-      return false;
-    }
-
-    // Create SES send email command
-    const command = new SendEmailCommand({
-      Source: fromEmail,
-      Destination: {
-        ToAddresses: [adminEmail],
-      },
-      Message: {
-        Subject: {
-          Data: subject,
-          Charset: 'UTF-8',
-        },
-        Body: {
-          Html: {
-            Data: htmlBody,
-            Charset: 'UTF-8',
-          },
-          Text: {
-            Data: textBody,
-            Charset: 'UTF-8',
-          },
-        },
-      },
-    });
-
-    // Send email
-    const response = await sesClient.send(command);
-
-    logger.info('admin_email_notification_sent', {
-      message_id: response.MessageId,
-      admin_email: adminEmail,
-      contact_type: notification.contactType,
-      service_type: notification.serviceType,
-    });
-
-    return true;
-  } catch (error) {
-    logger.error('admin_email_notification_failed', {
       error: String(error),
       error_name: error instanceof Error ? error.name : 'unknown',
       contact_type: notification.contactType,
