@@ -58,7 +58,7 @@ const KEKA_PAGES = [
   {
     url: 'https://kekarehabservices.com/contact-us/',
     title: 'Contact Us',
-    content: `Reach Keka Rehab Services at (617) 427-8494 or visit our office in Boston.
+    content: `Reach Keka Rehab Services at (857)345-9589 or visit our office in Boston.
     Office hours: Monday-Friday, 9:00 AM - 5:00 PM. For emergencies, call 911.
     We accept Medicare, Medi-Cal, and most major insurance plans.`,
   },
