@@ -44,3 +44,7 @@ Thumbs.db
 .cache/
 temp/
 tmp/
+
+# Handoff records - contain PHI (diagnosis, DOB, address, insurance).
+# Written only in development as a fallback when DATABASE_URL is unset.
+backend/data/handoffs.json

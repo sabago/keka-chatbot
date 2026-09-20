@@ -6,6 +6,10 @@ import { getPool } from '../db/init';
 import fs from 'fs';
 import path from 'path';
 
+// Matches the development-mode check in services/email.ts
+const nodeEnv = (process.env.NODE_ENV || '').toLowerCase().trim();
+const isDevelopment = nodeEnv === 'development' || nodeEnv === 'dev' || nodeEnv === '';
+
 export interface HandoffRecord extends HandoffRequest {
   timestamp: string;
   id: string;
@@ -123,8 +127,11 @@ export async function saveHandoffRequest(request: HandoffRequest, ipHash: string
     logger.error('handoff_database_save_failed', { error: String(error) });
   }
 
-  // Fallback to file system if database save failed or DATABASE_URL not set
-  if (!dbSaved) {
+  // Fallback to file system if the database save failed or DATABASE_URL is not set.
+  // Development only: handoff records contain PHI (diagnosis, DOB, address,
+  // insurance), so we never write them to plaintext disk storage in production.
+  // A production DB failure is escalated below instead.
+  if (!dbSaved && isDevelopment) {
     try {
       const dataDir = path.join(__dirname, '../../data');
       if (!fs.existsSync(dataDir)) {
@@ -147,6 +154,15 @@ export async function saveHandoffRequest(request: HandoffRequest, ipHash: string
     } catch (error) {
       logger.error('handoff_file_save_failed', { error: String(error) });
     }
+  } else if (!dbSaved) {
+    // Production with no durable store: alert loudly. The record is not
+    // persisted here, but the email notification below still delivers it.
+    logger.error('handoff_not_persisted', {
+      id: record.id,
+      session_id: request.session_id,
+      service_type: request.service_type,
+      message: 'Database save failed in production; record not written to disk (PHI). Relying on email notification.',
+    });
   }
 
   // Conditional notification routing based on contact type
