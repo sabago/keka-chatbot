@@ -42,34 +42,9 @@ export async function saveHandoffRequest(request: HandoffRequest, ipHash: string
       const pool = getPool();
 
       // Prepare form_data JSON from all additional fields
+      // Patient intake stores no health information (HIPAA); only
+      // care_for/care_setting, which have their own columns below.
       const formData = {
-        // Patient intake fields
-        date_of_birth: request.date_of_birth,
-        gender: request.gender,
-        address_street: request.address_street,
-        address_city: request.address_city,
-        address_state: request.address_state,
-        address_zip: request.address_zip,
-        emergency_contact_name: request.emergency_contact_name,
-        emergency_contact_relationship: request.emergency_contact_relationship,
-        emergency_contact_phone: request.emergency_contact_phone,
-        primary_diagnosis: request.primary_diagnosis,
-        secondary_conditions: request.secondary_conditions,
-        allergies: request.allergies,
-        physician_name: request.physician_name,
-        physician_contact: request.physician_contact,
-        assistive_devices: request.assistive_devices,
-        services_requested: request.services_requested,
-        can_walk_independently: request.can_walk_independently,
-        assistance_level: request.assistance_level,
-        fall_history: request.fall_history,
-        referral_source: request.referral_source,
-        referral_agency: request.referral_agency,
-        referral_contact: request.referral_contact,
-        primary_insurance: request.primary_insurance,
-        insurance_member_id: request.insurance_member_id,
-        secondary_insurance: request.secondary_insurance,
-        responsible_party: request.responsible_party,
         // Accreditation/Consulting fields
         business_name: request.business_name,
         business_location: request.business_location,
@@ -128,8 +103,8 @@ export async function saveHandoffRequest(request: HandoffRequest, ipHash: string
   }
 
   // Fallback to file system if the database save failed or DATABASE_URL is not set.
-  // Development only: handoff records contain PHI (diagnosis, DOB, address,
-  // insurance), so we never write them to plaintext disk storage in production.
+  // Development only: handoff records contain personal contact details, so we
+  // never write them to plaintext disk storage in production.
   // A production DB failure is escalated below instead.
   if (!dbSaved && isDevelopment) {
     try {
@@ -161,7 +136,7 @@ export async function saveHandoffRequest(request: HandoffRequest, ipHash: string
       id: record.id,
       session_id: request.session_id,
       service_type: request.service_type,
-      message: 'Database save failed in production; record not written to disk (PHI). Relying on email notification.',
+      message: 'Database save failed in production; record not written to disk (personal data). Relying on email notification.',
     });
   }
 
@@ -173,49 +148,8 @@ export async function saveHandoffRequest(request: HandoffRequest, ipHash: string
     contactName: request.contact_name,
     contactType: request.contact_type,
     contactValue: request.contact_value,
-    chatTranscript: request.chat_transcript, // Include chat conversation
 
-    // Patient intake fields - Section 1: Client Information
-    dateOfBirth: request.date_of_birth,
-    gender: request.gender,
-    addressStreet: request.address_street,
-    addressCity: request.address_city,
-    addressState: request.address_state,
-    addressZip: request.address_zip,
-
-    // Patient intake - Section 2: Emergency Contact
-    emergencyContactName: request.emergency_contact_name,
-    emergencyContactRelationship: request.emergency_contact_relationship,
-    emergencyContactPhone: request.emergency_contact_phone,
-
-    // Patient intake - Section 3: Medical Information
-    primaryDiagnosis: request.primary_diagnosis,
-    secondaryConditions: request.secondary_conditions,
-    allergies: request.allergies,
-    physicianName: request.physician_name,
-    physicianContact: request.physician_contact,
-    assistiveDevices: request.assistive_devices,
-
-    // Patient intake - Section 4: Services Requested
-    servicesRequested: request.services_requested,
-
-    // Patient intake - Section 5: Mobility
-    canWalkIndependently: request.can_walk_independently,
-    assistanceLevel: request.assistance_level,
-    fallHistory: request.fall_history,
-
-    // Patient intake - Section 6: Referral
-    referralSource: request.referral_source,
-    referralAgency: request.referral_agency,
-    referralContact: request.referral_contact,
-
-    // Patient intake - Section 7: Insurance
-    primaryInsurance: request.primary_insurance,
-    insuranceMemberId: request.insurance_member_id,
-    secondaryInsurance: request.secondary_insurance,
-    responsibleParty: request.responsible_party,
-
-    // Patient intake - Legacy fields
+    // Patient intake (no health information is collected)
     careFor: request.care_for,
     careSetting: request.care_setting,
 
@@ -224,7 +158,7 @@ export async function saveHandoffRequest(request: HandoffRequest, ipHash: string
     businessLocation: request.business_location,
     supportTypes: request.support_types,
     agencyStatus: request.agency_status,
-    startDate: request.preferred_start_date,
+    preferredStartDate: request.preferred_start_date,
     notesAccreditation: request.notes_accreditation,
 
     // Staffing/Employment fields
@@ -310,16 +244,4 @@ export function validateDate(dateString: string): boolean {
     date.getMonth() === month - 1 &&
     date.getDate() === day
   );
-}
-
-// Validate date is within reasonable range (1900-2025)
-export function validateDateRange(dateString: string): boolean {
-  if (!validateDate(dateString)) {
-    return false;
-  }
-
-  const [, , year] = dateString.split('/').map(Number);
-  const currentYear = new Date().getFullYear();
-
-  return year >= 1900 && year <= currentYear + 1;
 }

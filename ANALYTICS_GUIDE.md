@@ -151,9 +151,13 @@
   ANALYTICS_RETENTION_DAYS=90
 
   # Weekly Reports
+  # WEEKLY_REPORT_RECIPIENT accepts a
+  # comma-separated list; all listed
+  # addresses receive the report
   WEEKLY_REPORT_ENABLED=true
   WEEKLY_REPORT_RECIPIENT=admin@keka
-  rehabservices.com
+  rehabservices.com,second@kekarehab
+  services.com
   WEEKLY_REPORT_DAY=monday
   WEEKLY_REPORT_HOUR=9
 

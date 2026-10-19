@@ -1,4 +1,4 @@
-import { sendWeeklyReport } from '../services/emailReport';
+import { sendWeeklyReport, getReportRecipients } from '../services/emailReport';
 import { logger } from '../utils/logger';
 
 // Track last execution to avoid duplicate sends
@@ -107,7 +107,9 @@ export function startWeeklyReportScheduler(): void {
     return;
   }
 
-  if (!process.env.WEEKLY_REPORT_RECIPIENT) {
+  const recipients = getReportRecipients();
+
+  if (recipients.length === 0) {
     logger.warn('weekly_report_scheduler_no_recipient', {
       message: 'WEEKLY_REPORT_RECIPIENT not configured, scheduler disabled',
     });
@@ -117,7 +119,8 @@ export function startWeeklyReportScheduler(): void {
   logger.info('weekly_report_scheduler_started', {
     day: process.env.WEEKLY_REPORT_DAY || 'monday',
     hour: process.env.WEEKLY_REPORT_HOUR || '9',
-    recipient: process.env.WEEKLY_REPORT_RECIPIENT,
+    recipient_count: recipients.length,
+    recipients: recipients.join(', '),
   });
 
   // Check every hour
