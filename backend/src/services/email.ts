@@ -38,60 +38,14 @@ if (!isDevelopment) {
   }
 }
 
-interface ChatMessage {
-  sender: 'user' | 'bot';
-  text: string;
-  timestamp: string;
-}
-
 interface ContactNotification {
   serviceType: 'patient_intake' | 'accreditation_consulting' | 'staffing_employment' | 'general_inquiry';
   contactName?: string;
   contactType: 'email' | 'phone';
   contactValue: string;
-  chatTranscript?: ChatMessage[]; // Full conversation history
 
-  // Patient intake fields - Section 1: Client Information
-  dateOfBirth?: string;
-  gender?: string;
-  addressStreet?: string;
-  addressCity?: string;
-  addressState?: string;
-  addressZip?: string;
-
-  // Patient intake - Section 2: Emergency Contact
-  emergencyContactName?: string;
-  emergencyContactRelationship?: string;
-  emergencyContactPhone?: string;
-
-  // Patient intake - Section 3: Medical Information
-  primaryDiagnosis?: string;
-  secondaryConditions?: string;
-  allergies?: string;
-  physicianName?: string;
-  physicianContact?: string;
-  assistiveDevices?: string[];
-
-  // Patient intake - Section 4: Services Requested
-  servicesRequested?: string[];
-
-  // Patient intake - Section 5: Mobility
-  canWalkIndependently?: string;
-  assistanceLevel?: string;
-  fallHistory?: string;
-
-  // Patient intake - Section 6: Referral
-  referralSource?: string;
-  referralAgency?: string;
-  referralContact?: string;
-
-  // Patient intake - Section 7: Insurance
-  primaryInsurance?: string;
-  insuranceMemberId?: string;
-  secondaryInsurance?: string;
-  responsibleParty?: string;
-
-  // Patient intake - Legacy fields
+  // Patient intake. No health information is collected or emailed (HIPAA):
+  // staff gather clinical and insurance details by phone.
   careFor?: 'self' | 'loved_one';
   careSetting?: 'in_home' | 'adult_day_health' | 'clinic_visit';
 
@@ -129,80 +83,7 @@ ${notification.contactName ? `Contact Name: ${notification.contactName}\n` : ''}
 ${notification.contactType === 'email' ? 'Email' : 'Phone'}: ${notification.contactValue}
 `;
 
-  // Add chat transcript if available
-  if (notification.chatTranscript && notification.chatTranscript.length > 0) {
-    textBody += '\n=== CHAT CONVERSATION ===\n';
-    notification.chatTranscript.forEach((msg) => {
-      const time = new Date(msg.timestamp).toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        timeZone: EMAIL_TIME_ZONE,
-      });
-      textBody += `[${time}] ${msg.sender === 'user' ? 'User' : 'Bot'}: ${msg.text}\n`;
-    });
-  }
-
-  // Add comprehensive patient intake details (only if data exists)
   if (notification.serviceType === 'patient_intake') {
-    // Only add sections that have actual data
-    if (notification.dateOfBirth || notification.gender || notification.addressStreet || notification.addressCity) {
-      textBody += '\n=== CLIENT INFORMATION ===\n';
-      if (notification.dateOfBirth) textBody += `Date of Birth: ${notification.dateOfBirth}\n`;
-      if (notification.gender) {
-        const genderMap: Record<string, string> = { male: 'Male', female: 'Female', other: 'Other', prefer_not_to_say: 'Prefer not to say' };
-        textBody += `Gender: ${genderMap[notification.gender] || notification.gender}\n`;
-      }
-      if (notification.addressStreet || notification.addressCity) {
-        textBody += `Address: ${notification.addressStreet || ''}, ${notification.addressCity || ''}, ${notification.addressState || ''} ${notification.addressZip || ''}\n`;
-      }
-    }
-
-    if (notification.emergencyContactName || notification.emergencyContactPhone) {
-      textBody += '\n=== EMERGENCY CONTACT ===\n';
-      if (notification.emergencyContactName) textBody += `Name: ${notification.emergencyContactName}\n`;
-      if (notification.emergencyContactRelationship) textBody += `Relationship: ${notification.emergencyContactRelationship}\n`;
-      if (notification.emergencyContactPhone) textBody += `Phone: ${notification.emergencyContactPhone}\n`;
-    }
-
-    if (notification.primaryDiagnosis || notification.secondaryConditions || notification.allergies || notification.physicianName || (notification.assistiveDevices && notification.assistiveDevices.length > 0)) {
-      textBody += '\n=== MEDICAL INFORMATION ===\n';
-      if (notification.primaryDiagnosis) textBody += `Primary Diagnosis: ${notification.primaryDiagnosis}\n`;
-      if (notification.secondaryConditions) textBody += `Secondary Conditions: ${notification.secondaryConditions}\n`;
-      if (notification.allergies) textBody += `Allergies: ${notification.allergies}\n`;
-      if (notification.physicianName) textBody += `Physician: ${notification.physicianName}\n`;
-      if (notification.physicianContact) textBody += `Physician Contact: ${notification.physicianContact}\n`;
-      if (notification.assistiveDevices && notification.assistiveDevices.length > 0) {
-        textBody += `Assistive Devices: ${notification.assistiveDevices.join(', ')}\n`;
-      }
-    }
-
-    if (notification.servicesRequested && notification.servicesRequested.length > 0) {
-      textBody += '\n=== SERVICES REQUESTED ===\n';
-      textBody += `Services: ${notification.servicesRequested.join(', ')}\n`;
-    }
-
-    if (notification.canWalkIndependently || notification.assistanceLevel || notification.fallHistory) {
-      textBody += '\n=== MOBILITY ASSESSMENT ===\n';
-      if (notification.canWalkIndependently) textBody += `Can Walk Independently: ${notification.canWalkIndependently}\n`;
-      if (notification.assistanceLevel) textBody += `Assistance Level: ${notification.assistanceLevel}\n`;
-      if (notification.fallHistory) textBody += `Fall History (6 months): ${notification.fallHistory}\n`;
-    }
-
-    if (notification.referralSource || notification.referralContact) {
-      textBody += '\n=== REFERRAL SOURCE ===\n';
-      if (notification.referralSource) textBody += `Referral Source: ${notification.referralSource}\n`;
-      if (notification.referralAgency) textBody += `Referral Agency: ${notification.referralAgency}\n`;
-      if (notification.referralContact) textBody += `Referral Contact: ${notification.referralContact}\n`;
-    }
-
-    if (notification.primaryInsurance || notification.secondaryInsurance || notification.responsibleParty) {
-      textBody += '\n=== INSURANCE & PAYMENT ===\n';
-      if (notification.primaryInsurance) textBody += `Primary Insurance: ${notification.primaryInsurance}\n`;
-      if (notification.insuranceMemberId) textBody += `Member ID: ${notification.insuranceMemberId}\n`;
-      if (notification.secondaryInsurance) textBody += `Secondary Insurance: ${notification.secondaryInsurance}\n`;
-      if (notification.responsibleParty) textBody += `Responsible Party: ${notification.responsibleParty}\n`;
-    }
-
     if (notification.careFor || notification.careSetting) {
       textBody += '\n=== REQUEST DETAILS ===\n';
       if (notification.careFor) {
@@ -242,39 +123,6 @@ ${notification.contactType === 'email' ? 'Email' : 'Phone'}: ${notification.cont
   return textBody;
 }
 
-// Helper function to generate chat transcript HTML
-function generateChatTranscriptHTML(transcript?: ChatMessage[]): string {
-  if (!transcript || transcript.length === 0) {
-    return '';
-  }
-
-  const messageRows = transcript
-    .map((msg) => {
-      const isUser = msg.sender === 'user';
-      const time = new Date(msg.timestamp).toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        timeZone: EMAIL_TIME_ZONE,
-      });
-
-      return `
-        <tr><td style="padding: 8px 12px; border-left: 3px solid ${isUser ? '#27A9E2' : '#D1D5DB'}; background: ${isUser ? '#F0F9FF' : '#F9FAFB'};">
-          <div style="font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #6B7280;">
-            <strong style="color: #0F2B46;">${isUser ? 'Visitor' : 'Keka chatbot'}</strong> &middot; ${escapeHtml(time)}
-          </div>
-          <div style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; line-height: 1.5; color: #1F2937; padding-top: 2px; white-space: pre-wrap;">${escapeHtml(msg.text)}</div>
-        </td></tr>
-        <tr><td style="height: 6px; line-height: 6px; font-size: 6px;">&nbsp;</td></tr>`;
-    })
-    .join('');
-
-  return `
-    ${sectionHeading('Chat conversation')}
-    <tr><td style="padding: 10px 0 0 0;">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">${messageRows}</table>
-    </td></tr>`;
-}
-
 type DetailRow = [string, string];
 
 // Section with label/value rows, omitted entirely when it has no rows
@@ -292,59 +140,17 @@ function generateEmailHTML(notification: ContactNotification): string {
   let specificFields = '';
 
   if (notification.serviceType === 'patient_intake') {
-    const genderMap: Record<string, string> = {
-      'male': 'Male',
-      'female': 'Female',
-      'other': 'Other',
-      'prefer_not_to_say': 'Prefer not to say',
-    };
     const settingMap: Record<string, string> = {
       'in_home': 'In-Home Care',
       'adult_day_health': 'Adult Day Health',
       'clinic_visit': 'Clinic Visit',
     };
-    const hasAddress = notification.addressStreet || notification.addressCity;
     const settingLabel = notification.careSetting ? settingMap[notification.careSetting] : undefined;
 
-    specificFields = [
-      detailSection('Client information', [
-        !!notification.dateOfBirth && ['Date of birth', notification.dateOfBirth!],
-        !!notification.gender && ['Gender', genderMap[notification.gender!] || notification.gender!],
-        !!hasAddress && ['Address', `${notification.addressStreet || ''}, ${notification.addressCity || ''}, ${notification.addressState || ''} ${notification.addressZip || ''}`],
-      ]),
-      detailSection('Emergency contact', [
-        !!notification.emergencyContactName && ['Name', `${notification.emergencyContactName}${notification.emergencyContactRelationship ? ` (${notification.emergencyContactRelationship})` : ''}`],
-        !!notification.emergencyContactPhone && ['Phone', notification.emergencyContactPhone!],
-      ]),
-      detailSection('Medical information', [
-        !!notification.primaryDiagnosis && ['Primary diagnosis', notification.primaryDiagnosis!],
-        !!notification.secondaryConditions && ['Secondary conditions', notification.secondaryConditions!],
-        !!notification.allergies && ['Allergies', notification.allergies!],
-        !!notification.physicianName && ['Physician', `${notification.physicianName}${notification.physicianContact ? ` (${notification.physicianContact})` : ''}`],
-        !!notification.assistiveDevices?.length && ['Assistive devices', notification.assistiveDevices!.join(', ')],
-      ]),
-      detailSection('Services requested', [
-        !!notification.servicesRequested?.length && ['Requested services', notification.servicesRequested!.join(', ')],
-      ]),
-      detailSection('Mobility', [
-        !!notification.canWalkIndependently && ['Can walk independently', notification.canWalkIndependently === 'yes' ? 'Yes' : 'No'],
-        !!notification.assistanceLevel && ['Assistance level', notification.assistanceLevel!],
-        !!notification.fallHistory && ['Fall history (6 months)', notification.fallHistory === 'yes' ? 'Yes' : 'No'],
-      ]),
-      detailSection('Referral', [
-        !!notification.referralSource && ['Referral source', `${notification.referralSource}${notification.referralAgency ? ` - ${notification.referralAgency}` : ''}`],
-        !!notification.referralContact && ['Referral contact', notification.referralContact!],
-      ]),
-      detailSection('Insurance and payment', [
-        !!notification.primaryInsurance && ['Primary insurance', `${notification.primaryInsurance}${notification.insuranceMemberId ? ` (ID: ${notification.insuranceMemberId})` : ''}`],
-        !!notification.secondaryInsurance && ['Secondary insurance', notification.secondaryInsurance!],
-        !!notification.responsibleParty && ['Responsible party', notification.responsibleParty!],
-      ]),
-      detailSection('Request details', [
-        !!notification.careFor && ['Care requested for', notification.careFor === 'self' ? 'Themselves' : 'A loved one'],
-        !!settingLabel && ['Preferred care setting', settingLabel!],
-      ]),
-    ].join('');
+    specificFields = detailSection('Request details', [
+      !!notification.careFor && ['Care requested for', notification.careFor === 'self' ? 'Themselves' : 'A loved one'],
+      !!settingLabel && ['Preferred care setting', settingLabel!],
+    ]);
   } else if (notification.serviceType === 'accreditation_consulting') {
     const agencyStatusMap: Record<string, string> = {
       'new_prelicensing': 'New / Pre-licensing',
@@ -411,7 +217,6 @@ function generateEmailHTML(notification: ContactNotification): string {
       [notification.contactType === 'email' ? 'Email address' : 'Phone number', { html: contactLink }],
     ]),
     specificFields,
-    generateChatTranscriptHTML(notification.chatTranscript),
     sectionHeading('Submission'),
     detailRows([
       ['Submitted', new Date(notification.timestamp).toLocaleString('en-US', {

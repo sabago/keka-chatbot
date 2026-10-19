@@ -87,50 +87,13 @@ export const HandoffRequestSchema = z.object({
   contact_name: z.string().max(100).optional(),
   contact_type: z.enum(['phone', 'email']),
   contact_value: z.string().max(100),
-  chat_transcript: z.array(ChatMessageSchema).max(100).optional(), // Full conversation history
 
-  // Patient intake fields
-  // Section 1: Client Information
-  date_of_birth: z.string().max(50).optional(),
-  gender: z.enum(['male', 'female', 'other', 'prefer_not_to_say']).optional(),
-  address_street: z.string().max(200).optional(),
-  address_city: z.string().max(100).optional(),
-  address_state: z.string().max(50).optional(),
-  address_zip: z.string().max(20).optional(),
+  // Patient intake collects NO health information (HIPAA): no DOB, address,
+  // diagnosis, medications, insurance, etc. Staff gather those by phone.
+  // Unknown keys are stripped by zod, so clients can't send them either.
+  // The chat transcript is also not accepted, since visitors can type PHI.
 
-  // Section 2: Emergency Contact
-  emergency_contact_name: z.string().max(100).optional(),
-  emergency_contact_relationship: z.string().max(100).optional(),
-  emergency_contact_phone: z.string().max(50).optional(),
-
-  // Section 3: Medical Information
-  primary_diagnosis: z.string().max(300).optional(),
-  secondary_conditions: z.string().max(500).optional(),
-  allergies: z.string().max(300).optional(),
-  physician_name: z.string().max(100).optional(),
-  physician_contact: z.string().max(100).optional(),
-  assistive_devices: z.array(z.string()).optional(),
-
-  // Section 4: Services Requested
-  services_requested: z.array(z.string()).optional(),
-
-  // Section 5: Functional/Mobility Status
-  can_walk_independently: z.enum(['yes', 'no']).optional(),
-  assistance_level: z.enum(['independent', 'minimal', 'moderate', 'maximal', 'unable']).optional(),
-  fall_history: z.enum(['yes', 'no']).optional(),
-
-  // Section 6: Referral Source
-  referral_source: z.string().max(200).optional(),
-  referral_agency: z.string().max(200).optional(),
-  referral_contact: z.string().max(200).optional(),
-
-  // Section 7: Insurance & Payment
-  primary_insurance: z.string().max(100).optional(),
-  insurance_member_id: z.string().max(100).optional(),
-  secondary_insurance: z.string().max(100).optional(),
-  responsible_party: z.string().max(100).optional(),
-
-  // Legacy fields (backward compatibility)
+  // Patient intake: who the care is for and the preferred setting
   care_for: z.enum(['self', 'loved_one']).optional(),
   care_setting: z.enum(['in_home', 'adult_day_health', 'clinic_visit']).optional(),
   topic: z.string().max(200).optional(),
@@ -170,34 +133,6 @@ export const HandoffRequestSchema = z.object({
 }, {
   message: 'Invalid contact value format',
   path: ['contact_value'],
-}).refine((data) => {
-  // Validate date_of_birth format and range if provided
-  if (data.date_of_birth) {
-    // Accept both M/D/YYYY and MM/DD/YYYY formats
-    const dateRegex = /^(0?[1-9]|1[0-2])\/(0?[1-9]|[12][0-9]|3[01])\/(\d{4})$/;
-    if (!dateRegex.test(data.date_of_birth)) {
-      return false;
-    }
-    // Validate date is within reasonable range (1900-current year + 1)
-    const [, , year] = data.date_of_birth.split('/').map(Number);
-    const currentYear = new Date().getFullYear();
-    return year >= 1900 && year <= currentYear + 1;
-  }
-  return true;
-}, {
-  message: 'Invalid date of birth format (must be M/D/YYYY or MM/DD/YYYY) or out of range (1900-2025)',
-  path: ['date_of_birth'],
-}).refine((data) => {
-  // Validate emergency_contact_phone format if provided
-  if (data.emergency_contact_phone) {
-    // Simple validation: Check for exactly 10 digits (US format)
-    const digitsOnly = data.emergency_contact_phone.replace(/\D/g, '');
-    return digitsOnly.length === 10;
-  }
-  return true;
-}, {
-  message: 'Invalid emergency contact phone format',
-  path: ['emergency_contact_phone'],
 }).refine((data) => {
   // Validate preferred_start_date format if provided
   if (data.preferred_start_date) {
