@@ -281,11 +281,14 @@ a HANDOFF_EMAIL address? what's each
   (Analytics Reports)
 
   WEEKLY_REPORT_RECIPIENT=admin@keka
-  rehabservices.com
-  Purpose: This is the email address
-   that receives the weekly 
-  analytics summary every Monday at
-  9 AM.
+  rehabservices.com,second@kekarehab
+  services.com
+  Purpose: The address(es) that
+  receive the weekly analytics
+  summary every Monday at 9 AM.
+  Accepts a comma-separated list -
+  all listed addresses go on the To:
+  line and can see each other.
 
   Used in: backend/src/services/emai
   lReport.ts and
@@ -348,9 +351,12 @@ a HANDOFF_EMAIL address? what's each
   noreply@kekarehabservices.com│  ←
   SES_FROM_EMAIL
   │  To: admin@kekarehabservices.com
-      │  ← HANDOFF_EMAIL
-  │  Subject: "New Handoff Request"
+      │  ← ADMIN_EMAIL
+  │  Bcc: HANDOFF_EMAIL list (hidden)
       │
+  │  Subject: "New Patient / Client
+  Intake Request - Phone" (service
+  and contact method vary)    │
   └─────────────────────────────────
   ────┘
 
@@ -370,10 +376,12 @@ a HANDOFF_EMAIL address? what's each
   │  From:
   noreply@kekarehabservices.com│  ←
   SES_FROM_EMAIL
-  │  To: admin@kekarehabservices.com
+  │  To: all addresses listed in
       │  ← WEEKLY_REPORT_RECIPIENT
-  │  Subject: "Weekly Analytics
-  Report" │
+  │       (comma-separated)
+      │
+  │  Subject: "Keka Chatbot Weekly
+  Report - Oct 19, 2026"      │
   └─────────────────────────────────
   ────┘
 
@@ -406,18 +414,31 @@ a HANDOFF_EMAIL address? what's each
   operations team gets handoffs,
   management gets reports
 
-  Scenario 3: Multiple recipients 
-  (future enhancement)
+  Scenario 3: Multiple recipients
 
-  Currently, the code only supports
-  one recipient per email type. To
-  send to multiple people, you
-  could:
-  - Set up an email group/alias
-  (e.g., admin@ forwards to multiple
-   people)
-  - Or modify the code to accept
-  comma-separated emails
+  Both WEEKLY_REPORT_RECIPIENT and
+  HANDOFF_EMAIL accept a
+  comma-separated list, so no email
+  alias is required:
+
+  WEEKLY_REPORT_RECIPIENT=person1@ke
+  karehabservices.com,person2@kekare
+  habservices.com
+
+  Weekly report: every listed
+  address goes on the To: line and
+  recipients can see each other.
+  Handoff notifications: ADMIN_EMAIL
+   is the To: and HANDOFF_EMAIL is
+  the hidden Bcc list.
+
+  For both lists, whitespace around
+  entries is trimmed and repeated
+  addresses are de-duplicated
+  (case-insensitive). If ADMIN_EMAIL
+  also appears in HANDOFF_EMAIL it is
+  left off the Bcc list, since it is
+  already on the To: line.
 
   ---
   AWS SES Verification Required
@@ -481,6 +502,12 @@ a HANDOFF_EMAIL address? what's each
   tab
   WEEKLY_REPORT_RECIPIENT=newperson@
   kekarehabservices.com
+
+  Or list several, comma-separated:
+
+  WEEKLY_REPORT_RECIPIENT=person1@ke
+  karehabservices.com,person2@kekare
+  habservices.com
 
   No code changes needed!
 
