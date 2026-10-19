@@ -53,6 +53,14 @@ function calculateChange(current: number, previous: number): string {
 }
 
 /**
+ * Format an hour of day (0-23) as "2 PM"
+ */
+function formatHour(hour: number): string {
+  const suffix = hour < 12 ? 'AM' : 'PM';
+  return `${hour % 12 === 0 ? 12 : hour % 12} ${suffix}`;
+}
+
+/**
  * Format duration in seconds to human-readable format
  */
 function formatDuration(seconds: number): string {
@@ -162,14 +170,14 @@ async function getConcurrentStats(startDate: Date, endDate: Date): Promise<{
         GROUP BY h.hour
       )
       SELECT
-        EXTRACT(HOUR FROM hour) as hour_of_day,
+        EXTRACT(HOUR FROM hour AT TIME ZONE $3) as hour_of_day,
         AVG(concurrent_sessions) as avg_concurrent,
         MAX(concurrent_sessions) as max_concurrent
       FROM concurrent_per_hour
-      GROUP BY EXTRACT(HOUR FROM hour)
+      GROUP BY EXTRACT(HOUR FROM hour AT TIME ZONE $3)
       ORDER BY max_concurrent DESC
       LIMIT 1;
-    `, [startDate, endDate]);
+    `, [startDate, endDate, EMAIL_TIME_ZONE]);
 
     // Calculate overall average concurrent
     const avgResult = await pool.query(`
@@ -269,10 +277,10 @@ async function generateWeeklyReportHTML(): Promise<string> {
         })
       : 'N/A';
 
-    // Format busiest hour
+    // Format busiest hour (already in Massachusetts local time)
     const busiestHour = concurrentStats.busiest_hour;
     const busiestHourFormatted = busiestHour !== null
-      ? `${busiestHour}:00 - ${(busiestHour + 1) % 24}:00`
+      ? `${formatHour(busiestHour)} - ${formatHour((busiestHour + 1) % 24)} ET`
       : 'N/A';
 
     const { conversion_metrics, session_metrics, popular_faqs, intake_metrics } = metrics;
@@ -317,7 +325,7 @@ async function generateWeeklyReportHTML(): Promise<string> {
         },
         {
           label: 'Busiest hour',
-          value: busiestHour !== null ? `${busiestHour}:00` : 'N/A',
+          value: busiestHour !== null ? formatHour(busiestHour) : 'N/A',
           note: busiestHour !== null ? busiestHourFormatted : 'No data',
         },
       ]),
@@ -338,13 +346,12 @@ async function generateWeeklyReportHTML(): Promise<string> {
       sectionHeading('Most viewed FAQs'),
       popular_faqs.length > 0
         ? dataTable(
-            ['Category', 'Question', 'Views', 'Resolved'],
+            ['Category', 'Question', 'Views'],
             popular_faqs.map((faq) => [
               ...faqLabels(faq.category, faq.question_id),
               formatNumber(faq.view_count),
-              faq.resolution_rate ? formatPercent(faq.resolution_rate) : 'N/A',
             ]),
-            ['left', 'left', 'right', 'right']
+            ['left', 'left', 'right']
           )
         : paragraph('No FAQ data available for this period.'),
 
