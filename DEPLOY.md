@@ -170,7 +170,7 @@
  HASH_SALT=<generate-32-char-random-str
  ing>
 
- Optional (Email/SMS)
+ Optional (Email)
 
  AWS_REGION=us-east-1
  AWS_ACCESS_KEY_ID=<your-key>
@@ -179,7 +179,6 @@
  es.com
  HANDOFF_EMAIL=admin@kekarehabservices.
  com
- HANDOFF_PHONE=+1234567890
 
  ---
  PART 5: WordPress Embedding

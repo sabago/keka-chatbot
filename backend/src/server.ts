@@ -26,7 +26,6 @@ const ALLOWED_EMBED_DOMAINS = process.env.ALLOWED_EMBED_DOMAINS
   : [
       'kekarehabservices.com',
       'www.kekarehabservices.com',
-      'saddlebrown-grouse-469515.hostingersite.com'  // Hostinger staging site
     ];
 
 // Log the allowed domains on startup

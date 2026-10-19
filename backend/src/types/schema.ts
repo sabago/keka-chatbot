@@ -69,15 +69,6 @@ export const ChatRequestSchema = z.object({
 
 export type ChatRequest = z.infer<typeof ChatRequestSchema>;
 
-// Chat message schema (for transcript)
-export const ChatMessageSchema = z.object({
-  sender: z.enum(['user', 'bot']),
-  text: z.string().max(1000),
-  timestamp: z.string(),
-});
-
-export type ChatMessage = z.infer<typeof ChatMessageSchema>;
-
 // Handoff request
 export const HandoffRequestSchema = z.object({
   // Service type discriminator

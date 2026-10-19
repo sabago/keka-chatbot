@@ -169,7 +169,7 @@ The chatbot uses the highest practical `z-index`. If a theme element still cover
 Framing 'https://keka-chatbot-production.up.railway.app/' violates the following Content Security Policy directive: "frame-ancestors ...". The request has been blocked.
 ```
 
-The chatbot only allows these sites to embed it: `kekarehabservices.com`, `www.kekarehabservices.com`, and the Hostinger staging site. To add another domain, set `ALLOWED_EMBED_DOMAINS` in Railway (comma-separated, replaces the defaults):
+The chatbot only allows these sites to embed it: `kekarehabservices.com` and `www.kekarehabservices.com`. To add another domain, set `ALLOWED_EMBED_DOMAINS` in Railway (comma-separated, replaces the defaults):
 ```
 ALLOWED_EMBED_DOMAINS=kekarehabservices.com,www.kekarehabservices.com,newsite.com
 ```
