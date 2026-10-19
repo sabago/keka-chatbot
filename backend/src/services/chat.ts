@@ -4,6 +4,7 @@ import { getHomeScreen, getCategoryButtons, getFAQAnswer, getResolutionButtons }
 import { generateRetrievalResponse } from './retrieve';
 import { saveHandoffRequest, validateContact, validateDate, validateDateRange } from './handoff';
 import { sendContactNotification } from './email';
+import { saveEvent } from './analytics';
 import { logger } from '../utils/logger';
 import { pushState, popState, canGoBack, clearHistory } from '../utils/stateHistory';
 
@@ -663,7 +664,7 @@ export async function handleChatMessage(request: ChatRequest, ipHash: string): P
 
   switch (currentState) {
     case 'awaiting_user_choice':
-      return handleUserChoice(message, session_data);
+      return handleUserChoice(message, session_data, request.session_id, ipHash);
 
     case 'awaiting_contact':
       return handleAwaitingContact(message, session_data);
@@ -764,7 +765,7 @@ export async function handleChatMessage(request: ChatRequest, ipHash: string): P
 }
 
 // Handle user choice from menu
-function handleUserChoice(message: string, sessionData: any): BotResponse {
+function handleUserChoice(message: string, sessionData: any, sessionId: string, ipHash: string): BotResponse {
   const choice = message.toLowerCase();
 
   // Patient / Client Intake flow
@@ -886,6 +887,15 @@ function handleUserChoice(message: string, sessionData: any): BotResponse {
   if (category) {
     const faqAnswer = getFAQAnswer(category, choice);
     if (faqAnswer) {
+      // Record the view for the weekly report's "Most viewed FAQs".
+      // Fire-and-forget: saveEvent never throws and must not delay the reply.
+      void saveEvent({
+        session_id: sessionId,
+        event_type: 'faq_question_viewed',
+        metadata: { category, question_id: faqAnswer.id },
+        ip_hash: ipHash,
+      });
+
       // Show answer with links, then immediately show navigation options
       return {
         text: faqAnswer.answer,
