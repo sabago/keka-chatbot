@@ -182,54 +182,17 @@
  HANDOFF_PHONE=+1234567890
 
  ---
- PART 5: WordPress Embedding Options
+ PART 5: WordPress Embedding
 
- Once deployed to Railway (e.g.,
- https://keka-chatbot.railway.app), you
-  have 3 embedding options:
+ Add this one line to the site footer (see
+ WORDPRESS_EMBED.md for step-by-step instructions):
 
- Option A: iframe Embed (Easiest)
+ <script src="https://keka-chatbot-production.up.railway.app/embed.js" async></script>
 
- <!-- WordPress HTML Block -->
- <iframe 
-   
- src="https://keka-chatbot.railway.app"
-  
-   style="position: fixed; bottom: 
- 20px; right: 20px; width: 400px; 
- height: 600px; border: none; z-index: 
- 9999; border-radius: 16px; box-shadow:
-  0 10px 40px rgba(0,0,0,0.2);"
-   title="Keka Support Chat">
- </iframe>
-
- Pros: Simple, no conflicts, easy to
- update
- Cons: Fixed size, cross-origin
- limitations
-
- Option B: Popup Window
-
- <!-- WordPress HTML Block -->
- <button onclick="window.open('https://
- keka-chatbot.railway.app', 'chat', 
- 'width=400,height=600')">
-   Chat with Keka
- </button>
-
- Pros: Full functionality, no embedding
-  issues
- Cons: Popup blockers, separate window
-
- Option C: WordPress Plugin with AJAX
-
- Create a plugin that loads the chatbot
-  UI locally and makes API calls to
- Railway backend.
-
- Pros: Native integration, no iframe
- Cons: Requires plugin development,
- complex
+ It shows a chat bubble in the bottom-right corner. The chat
+ opens only when the visitor clicks the bubble, or any link
+ to #keka-chat (e.g. a "Chat with us" button). It never
+ opens on its own.
 
  ---
  DEPLOYMENT STEPS SUMMARY

@@ -11,7 +11,7 @@ import {
 } from "../utils/analytics";
 
 export default function ChatWidget() {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const {
     messages,
     isLoading,
@@ -38,17 +38,25 @@ export default function ChatWidget() {
     }
   }, [isOpen, messages.length, sendMessage, sessionId]);
 
-  // Persist open/close state
+  // When embedded (embed.js on the WordPress site), tell the host page our
+  // open/closed state so it can resize the iframe. No user data is sent.
   useEffect(() => {
-    const savedState = sessionStorage.getItem("chat-open");
-    if (savedState === "true") {
-      setIsOpen(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    sessionStorage.setItem("chat-open", isOpen ? "true" : "false");
+    if (window.parent === window) return;
+    window.parent.postMessage({ source: "keka-chat", type: "state", open: isOpen }, "*");
   }, [isOpen]);
+
+  // Let host-page buttons (#keka-chat links) open the chat. Only allowlisted
+  // sites can frame us (CSP frame-ancestors), so the parent is trusted.
+  useEffect(() => {
+    const handleHostMessage = (event: MessageEvent) => {
+      if (event.source !== window.parent) return;
+      if (event.data?.source === "keka-chat-host" && event.data?.type === "open") {
+        setIsOpen(true);
+      }
+    };
+    window.addEventListener("message", handleHostMessage);
+    return () => window.removeEventListener("message", handleHostMessage);
+  }, []);
 
   const handleOpen = () => {
     setIsOpen(true);
