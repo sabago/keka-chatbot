@@ -111,6 +111,15 @@ app.use('/api', analyticsRouter);
 if (process.env.NODE_ENV === 'production') {
   const publicPath = path.join(__dirname, 'public');
 
+  // embed.js is loaded by <script> on the WordPress site, so it must be
+  // cross-origin readable (Helmet defaults CORP to same-origin). Short cache
+  // so loader updates reach visitors quickly.
+  app.get('/embed.js', (req, res, next) => {
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    res.setHeader('Cache-Control', 'public, max-age=300');
+    next();
+  });
+
   // Serve static assets
   app.use(express.static(publicPath));
 
