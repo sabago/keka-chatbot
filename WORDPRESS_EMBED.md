@@ -1,383 +1,130 @@
 # WordPress Embedding Guide for Keka Chatbot
 
-This guide shows you how to embed the Keka HIPAA-compliant chatbot on your WordPress website using an iframe. The chatbot will appear as a fixed widget in the bottom-right corner of your pages.
+This guide shows you how to add the Keka HIPAA-compliant chatbot to your WordPress website. Visitors see a round chat bubble in the bottom-right corner of every page. The chat opens **only** when they click the bubble, or a "Chat with us" button you add. It never opens on its own.
 
 ## Table of Contents
 1. [Quick Start](#quick-start)
-2. [Method 1: Theme Footer (Sitewide - Recommended)](#method-1-theme-footer-sitewide---recommended)
-3. [Method 2: WordPress Plugin (Easiest)](#method-2-wordpress-plugin-easiest)
-4. [Method 3: Custom Code Plugin](#method-3-custom-code-plugin)
-5. [Method 4: Individual Pages Only](#method-4-individual-pages-only)
-6. [Customization Options](#customization-options)
+2. [Upgrading from the Old iframe Snippet](#upgrading-from-the-old-iframe-snippet)
+3. [Method 1: WordPress Plugin (Easiest)](#method-1-wordpress-plugin-easiest)
+4. [Method 2: Theme Footer](#method-2-theme-footer)
+5. [Method 3: Code Snippets (PHP)](#method-3-code-snippets-php)
+6. [Adding Your Own "Chat with us" Button](#adding-your-own-chat-with-us-button)
 7. [Testing & Troubleshooting](#testing--troubleshooting)
-8. [Mobile Responsiveness](#mobile-responsiveness)
+8. [How It Works](#how-it-works)
 9. [Security & Privacy](#security--privacy)
 
 ---
 
 ## Quick Start
 
-**What you'll embed:**
+**What you'll add to your site footer:**
 ```html
-<iframe
-  src="https://keka-chatbot-production.up.railway.app"
-  style="position: fixed; bottom: 20px; right: 20px; width: 400px; height: 600px; border: none; z-index: 9999; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);"
-  title="Keka Support Chat">
-</iframe>
+<!-- Keka Chatbot -->
+<script src="https://keka-chatbot-production.up.railway.app/embed.js" async></script>
 ```
 
-**Result:** A chat widget appears in the bottom-right corner on every page of your site.
+**Result:** a chat bubble appears in the bottom-right corner on every page. When a visitor clicks it, the chat panel opens. On phones the panel opens full-screen.
 
 ---
 
-## Method 1: Theme Footer (Sitewide - Recommended)
+## Upgrading from the Old iframe Snippet
 
-### Best For:
-- Making the chatbot visible on ALL pages sitewide
-- Users comfortable editing theme files
-- Maximum control over implementation
+Earlier versions of this guide used an `<iframe src="https://keka-chatbot-production.up.railway.app" style="position: fixed; ... width: 400px; height: 600px; ...">` snippet. That snippet always showed the chat panel open, and it covered a 400×600 area of the page.
 
-### Prerequisites:
-- Access to WordPress Admin Dashboard
-- Permission to edit theme files
-- Basic understanding of HTML
+To upgrade:
+1. Find where the old `<iframe ...>` snippet was added. It could be in a header/footer plugin, `footer.php`, Code Snippets, a Custom HTML block, or Google Tag Manager.
+2. **Delete the whole iframe snippet.** Don't keep it next to the new one, or two chatbots will show.
+3. Paste the new `<script>` line in its place.
+4. Clear your WordPress and CDN caches (see [Troubleshooting](#issue-1-chatbot-doesnt-appear)).
 
-### Step-by-Step Instructions:
+---
 
-#### Step 1: Create a Child Theme (Recommended)
+## Method 1: WordPress Plugin (Easiest)
 
-**Why?** Editing your main theme directly means updates will overwrite your changes. A child theme protects your customizations.
+### Recommended Plugin: "WPCode" (formerly "Insert Headers and Footers")
 
-1. Log into your WordPress Admin Dashboard
-2. Go to **Appearance > Theme File Editor**
-3. If you don't have a child theme:
-   - Go to **Appearance > Themes > Add New**
-   - Search for "Child Theme Configurator" plugin
-   - Install and activate it
-   - Go to **Tools > Child Themes**
-   - Create a child theme for your current theme
+1. Go to **Plugins > Add New**
+2. Search for "WPCode" (or "Insert Headers and Footers")
+3. Click **Install Now**, then **Activate**
+4. Go to **Code Snippets > Header & Footer** (or **Settings > Insert Headers and Footers**)
+5. In the **Footer** section, paste:
+   ```html
+   <!-- Keka Chatbot -->
+   <script src="https://keka-chatbot-production.up.railway.app/embed.js" async></script>
+   ```
+6. Click **Save**
 
-#### Step 2: Edit the Footer File
+**Pros:** no code editing, survives theme updates, easy to turn off.
+
+---
+
+## Method 2: Theme Footer
+
+Use a child theme so theme updates don't overwrite your change.
 
 1. Go to **Appearance > Theme File Editor**
-2. **Important Warning:** WordPress will show a warning about editing theme files. Proceed carefully.
-3. In the right sidebar, select **Theme Footer (footer.php)**
-4. Scroll to the bottom of the file
-5. Find the closing `</body>` tag (usually near the end)
-6. **Paste the following code BEFORE the `</body>` tag:**
-
-```html
-<!-- Keka Chatbot Widget -->
-<iframe
-  src="https://keka-chatbot-production.up.railway.app"
-  style="position: fixed; bottom: 20px; right: 20px; width: 400px; height: 600px; border: none; z-index: 9999; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);"
-  title="Keka Support Chat"
-  loading="lazy">
-</iframe>
-<!-- End Keka Chatbot Widget -->
-```
-
-7. Click **Update File**
-
-#### Step 3: Verify
-
-1. Visit any page on your website
-2. The chatbot widget should appear in the bottom-right corner
-3. Click it to test functionality
-
-### Pros:
-- ✅ Appears on all pages automatically
-- ✅ Loads with the page (no plugin overhead)
-- ✅ Full control over placement
-- ✅ Survives plugin deactivations
-
-### Cons:
-- ❌ Requires editing theme files
-- ❌ Can be overwritten by theme updates (use child theme!)
-- ❌ Requires basic HTML knowledge
+2. Select **Theme Footer (footer.php)**
+3. Paste the snippet just **before** the closing `</body>` tag:
+   ```html
+   <!-- Keka Chatbot -->
+   <script src="https://keka-chatbot-production.up.railway.app/embed.js" async></script>
+   ```
+4. Click **Update File**
 
 ---
 
-## Method 2: WordPress Plugin (Easiest)
+## Method 3: Code Snippets (PHP)
 
-### Best For:
-- Users who want to avoid editing code
-- Quick setup without technical knowledge
-- Easy to enable/disable
+Use this if you want PHP control, such as showing the chatbot on only some pages.
 
-### Recommended Plugin: "Insert Headers and Footers"
-
-#### Step 1: Install the Plugin
-
-1. Go to **Plugins > Add New**
-2. Search for "Insert Headers and Footers" (by WPBeginner)
-3. Click **Install Now**
-4. Click **Activate**
-
-#### Step 2: Add the Chatbot Code
-
-1. Go to **Settings > Insert Headers and Footers**
-2. Scroll to the **Scripts in Footer** section
-3. Paste the following code:
-
-```html
-<!-- Keka Chatbot Widget -->
-<iframe
-  src="https://keka-chatbot-production.up.railway.app"
-  style="position: fixed; bottom: 20px; right: 20px; width: 400px; height: 600px; border: none; z-index: 9999; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);"
-  title="Keka Support Chat"
-  loading="lazy">
-</iframe>
-<!-- End Keka Chatbot Widget -->
-```
-
-4. Click **Save**
-
-#### Step 3: Verify
-
-1. Visit your website
-2. The chatbot should appear on all pages
-
-### Pros:
-- ✅ No code editing required
-- ✅ User-friendly interface
-- ✅ Easy to remove/disable
-- ✅ Works with any theme
-- ✅ Survives theme updates
-
-### Cons:
-- ❌ Adds another plugin (minimal overhead)
-- ❌ Requires plugin to stay active
-
-### Alternative Plugins:
-
-**Option A: "Head, Footer and Post Injections"**
-- More features but slightly more complex
-- Allows per-page control
-
-**Option B: "Code Snippets"**
-- For users comfortable with PHP
-- More powerful but requires coding knowledge
-
----
-
-## Method 3: Custom Code Plugin
-
-### Best For:
-- Advanced users who want PHP control
-- Conditional display (show on certain pages only)
-- Integration with WordPress hooks
-
-### Using "Code Snippets" Plugin
-
-#### Step 1: Install Code Snippets
-
-1. Go to **Plugins > Add New**
-2. Search for "Code Snippets"
-3. Install and activate
-
-#### Step 2: Create a New Snippet
-
-1. Go to **Snippets > Add New**
-2. Give it a name: "Keka Chatbot Embed"
-3. Paste the following PHP code:
+1. Install and activate the **Code Snippets** plugin
+2. Go to **Snippets > Add New** and name it "Keka Chatbot"
+3. Paste:
 
 ```php
 <?php
 /**
- * Embed Keka Chatbot on all pages
+ * Load the Keka chatbot bubble on the front end
  */
 function keka_chatbot_embed() {
+    // Examples of limiting where it shows:
+    // if (!is_front_page()) return;
+    // if (is_page(array(123, 456))) return;
     ?>
-    <!-- Keka Chatbot Widget -->
-    <iframe
-      src="https://keka-chatbot-production.up.railway.app"
-      style="position: fixed; bottom: 20px; right: 20px; width: 400px; height: 600px; border: none; z-index: 9999; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);"
-      title="Keka Support Chat"
-      loading="lazy">
-    </iframe>
-    <!-- End Keka Chatbot Widget -->
+    <script src="https://keka-chatbot-production.up.railway.app/embed.js" async></script>
     <?php
 }
 add_action('wp_footer', 'keka_chatbot_embed');
 ```
 
-4. Set **Run snippet everywhere** (or customize)
-5. Click **Save Changes and Activate**
-
-### Advanced: Conditional Display
-
-To show the chatbot only on specific pages, modify the function:
-
-```php
-function keka_chatbot_embed() {
-    // Only show on homepage
-    if (is_front_page()) {
-        ?>
-        <!-- Keka Chatbot Widget -->
-        <iframe
-          src="https://keka-chatbot-production.up.railway.app"
-          style="position: fixed; bottom: 20px; right: 20px; width: 400px; height: 600px; border: none; z-index: 9999; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);"
-          title="Keka Support Chat"
-          loading="lazy">
-        </iframe>
-        <?php
-    }
-
-    // To show on specific page IDs:
-    // if (is_page(array(123, 456, 789))) { ... }
-
-    // To exclude admin and login pages:
-    // if (!is_admin() && !is_page('login')) { ... }
-}
-```
-
-### Pros:
-- ✅ Powerful conditional logic
-- ✅ Clean code management
-- ✅ Easy to modify/disable
-- ✅ No theme file editing
-
-### Cons:
-- ❌ Requires basic PHP knowledge
-- ❌ Another plugin dependency
+4. Set **Run snippet everywhere** (front end only), then **Save Changes and Activate**
 
 ---
 
-## Method 4: Individual Pages Only
+## Adding Your Own "Chat with us" Button
 
-### Best For:
-- Testing before sitewide deployment
-- Showing chatbot on specific pages/posts only
-- Landing pages or contact pages
+The floating bubble is always available. You can also open the chat from any button or link on your pages:
 
-### Step-by-Step:
+**Elementor Button widget:** set the button's **Link** to `#keka-chat`.
 
-1. Edit any Page or Post in WordPress
-2. Click the **(+)** button to add a new block
-3. Search for "Custom HTML" block
-4. Add the Custom HTML block
-5. Paste the iframe code:
+**Gutenberg Button block / any link:** set the URL to `#keka-chat`.
 
+**Custom HTML:**
 ```html
-<iframe
-  src="https://keka-chatbot-production.up.railway.app"
-  style="position: fixed; bottom: 20px; right: 20px; width: 400px; height: 600px; border: none; z-index: 9999; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);"
-  title="Keka Support Chat"
-  loading="lazy">
-</iframe>
+<a href="#keka-chat">Chat with us</a>
+
+<!-- or any element with data-keka-chat -->
+<button type="button" data-keka-chat>Questions? Chat with us</button>
 ```
 
-6. Click **Update** or **Publish**
-
-### Pros:
-- ✅ No code or plugin required
-- ✅ Perfect for testing
-- ✅ Page-specific control
-
-### Cons:
-- ❌ Not sitewide (must add to each page manually)
-- ❌ Can be accidentally deleted during editing
-
----
-
-## Customization Options
-
-### Position Adjustments
-
-**Bottom-Left Corner:**
-```html
-style="position: fixed; bottom: 20px; left: 20px; width: 400px; height: 600px; ..."
+**JavaScript** (advanced):
+```js
+window.KekaChat.open();
 ```
 
-**Top-Right Corner:**
-```html
-style="position: fixed; top: 20px; right: 20px; width: 400px; height: 600px; ..."
-```
+Clicking one of these opens the chat panel. The page doesn't jump or scroll, and `#keka-chat` isn't added to the address bar.
 
-**Centered on Page:**
-```html
-style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; height: 600px; ..."
-```
-
-### Size Adjustments
-
-**Larger Widget:**
-```html
-width: 500px; height: 700px;
-```
-
-**Smaller Widget (Mobile-Friendly):**
-```html
-width: 350px; height: 500px;
-```
-
-**Full Screen on Mobile (Advanced):**
-```html
-<style>
-  #keka-chatbot {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 400px;
-    height: 600px;
-    border: none;
-    z-index: 9999;
-    border-radius: 16px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-  }
-
-  @media (max-width: 768px) {
-    #keka-chatbot {
-      width: 100vw;
-      height: 100vh;
-      bottom: 0;
-      right: 0;
-      border-radius: 0;
-    }
-  }
-</style>
-
-<iframe
-  id="keka-chatbot"
-  src="https://keka-chatbot-production.up.railway.app"
-  title="Keka Support Chat"
-  loading="lazy">
-</iframe>
-```
-
-### Z-Index Conflicts
-
-If the chatbot appears behind other elements:
-
-1. Increase the `z-index` value:
-```html
-z-index: 99999;
-```
-
-2. Common WordPress theme z-index values:
-   - Navigation menus: 1000-2000
-   - Popups/Modals: 9000-10000
-   - Admin bar: 99999
-
-3. Set your chatbot z-index **higher** than other elements
-
-### Shadow and Border Customization
-
-**No Shadow:**
-```html
-box-shadow: none;
-```
-
-**Softer Shadow:**
-```html
-box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-```
-
-**Border Instead of Shadow:**
-```html
-box-shadow: none; border: 2px solid #0066cc;
-```
+> Note: visiting a URL that ends in `#keka-chat` does **not** open the chat automatically. It opens only on a click.
 
 ---
 
@@ -385,313 +132,91 @@ box-shadow: none; border: 2px solid #0066cc;
 
 ### Testing Checklist
 
-- [ ] Chatbot appears in the bottom-right corner
-- [ ] Clicking the chat bubble opens the panel
-- [ ] All 7 service category buttons are visible
-- [ ] FAQ questions load and display answers
-- [ ] Links in answers open in new tabs
+- [ ] Only the chat bubble shows when a page loads (the panel is closed)
+- [ ] Page content near the bottom-right corner can still be clicked
+- [ ] Clicking the bubble opens the panel
+- [ ] The **X** button and the **Esc** key close the panel back to the bubble
+- [ ] "Chat with us" links (`#keka-chat`) open the panel
+- [ ] Going to another page shows the bubble closed again
+- [ ] All service category buttons are visible
 - [ ] "Start Intake" flow works (email/phone collection)
 - [ ] PHI detection works (try typing "my SSN is 123-45-6789")
-- [ ] Mobile responsiveness (test on phone)
-- [ ] Chatbot doesn't overlap important page content
+- [ ] On a phone, the panel opens full-screen and closes back to the bubble
 
-### Common Issues
+### Issue 1: Chatbot Doesn't Appear
 
-#### Issue 1: Chatbot Doesn't Appear
-
-**Possible Causes:**
-- Code not saved properly
-- Caching plugin preventing update
-- JavaScript conflicts
-
-**Solutions:**
 1. Clear browser cache (Ctrl+Shift+R or Cmd+Shift+R)
 2. Clear WordPress cache:
-   - If using WP Super Cache: **Settings > WP Super Cache > Delete Cache**
-   - If using W3 Total Cache: **Performance > Dashboard > Empty All Caches**
-   - If using WP Rocket: **Settings > WP Rocket > Clear Cache**
-3. Disable caching temporarily to test
-4. Check browser console for errors (F12 > Console tab)
+   - WP Super Cache: **Settings > WP Super Cache > Delete Cache**
+   - W3 Total Cache: **Performance > Dashboard > Empty All Caches**
+   - WP Rocket: **Settings > WP Rocket > Clear Cache**
+   - LiteSpeed / Hostinger: **LiteSpeed Cache > Toolbox > Purge All**
+3. If you use an "optimize/delay/combine JavaScript" feature (WP Rocket, LiteSpeed, Autoptimize), exclude `embed.js` from it
+4. Check the browser console (F12 > Console) for errors
 
-#### Issue 2: Chatbot Appears Behind Other Elements
+### Issue 2: Two Chatbots, or a Large Blank Box
 
-**Solution:**
-Increase the `z-index` value in the iframe style:
-```html
-z-index: 99999;
-```
+The old iframe snippet is still on the page. Remove it (see [Upgrading](#upgrading-from-the-old-iframe-snippet)).
 
-#### Issue 3: Chatbot Overlaps Important Content
+### Issue 3: Chatbot Appears Behind Other Elements
 
-**Solutions:**
+The chatbot uses the highest practical `z-index`. If a theme element still covers it, that element is probably using `position: fixed` with a huge z-index. Lower that element's z-index in your theme CSS.
 
-**Option A: Adjust Position**
-```html
-bottom: 80px; right: 30px;
-```
-
-**Option B: Add Padding to Your Content**
-Add this CSS to your theme:
-```css
-body {
-  padding-bottom: 650px;
-}
-
-@media (min-width: 768px) {
-  body {
-    padding-bottom: 0;
-    padding-right: 420px;
-  }
-}
-```
-
-**Option C: Hide on Specific Pages**
-Using Code Snippets plugin:
-```php
-function keka_chatbot_embed() {
-    // Don't show on checkout or cart pages
-    if (is_checkout() || is_cart()) {
-        return;
-    }
-    // ... rest of code
-}
-```
-
-#### Issue 4: "Connection Failed" Error
-
-**Possible Causes:**
-- Railway deployment is down
-- Backend API issue
-- CORS configuration problem
-
-**Solutions:**
-1. Check if production site is live: Visit `https://keka-chatbot-production.up.railway.app/api/health`
-   - Should return: `{"status":"ok","timestamp":"..."}`
-2. Check Railway dashboard for deployment status
-3. Review backend logs for errors
-4. Verify environment variables are set correctly
-
-#### Issue 5: "frame-ancestors" CSP Error (CRITICAL)
+### Issue 4: "frame-ancestors" CSP Error
 
 **Error Message:**
 ```
-Framing 'https://keka-chatbot-production.up.railway.app/' violates the following Content Security Policy directive: "frame-ancestors 'self'". The request has been blocked.
+Framing 'https://keka-chatbot-production.up.railway.app/' violates the following Content Security Policy directive: "frame-ancestors ...". The request has been blocked.
 ```
 
-**What This Means:**
-The chatbot's Content Security Policy (CSP) is blocking your WordPress site from embedding it in an iframe. By default, the chatbot only allows embedding on its own domain.
-
-**Solution:**
-The backend code has been updated to allow embedding on `kekarehabservices.com` by default. After deploying the updated code, the error will resolve.
-
-**If you need to embed on a different domain:**
-
-1. Set the `ALLOWED_EMBED_DOMAINS` environment variable in Railway:
-   ```
-   ALLOWED_EMBED_DOMAINS=https://yoursite.com,https://www.yoursite.com
-   ```
-
-2. Deploy the changes:
-   - Go to Railway dashboard
-   - Select your project
-   - Go to **Variables** tab
-   - Add `ALLOWED_EMBED_DOMAINS` with your domains (comma-separated)
-   - Save and redeploy
-
-3. Clear your browser cache and test again
-
-**Note:** This fix is already included in the codebase. You just need to redeploy to Railway for it to take effect.
-
-#### Issue 6: Slow Loading
-
-**Solutions:**
-
-**Option A: Add `loading="lazy"` Attribute**
-```html
-<iframe ... loading="lazy">
+The chatbot only allows these sites to embed it: `kekarehabservices.com`, `www.kekarehabservices.com`, and the Hostinger staging site. To add another domain, set `ALLOWED_EMBED_DOMAINS` in Railway (comma-separated, replaces the defaults):
 ```
-
-**Option B: Delay Loading Until Page Load**
-```html
-<script>
-window.addEventListener('load', function() {
-  var iframe = document.createElement('iframe');
-  iframe.src = 'https://keka-chatbot-production.up.railway.app';
-  iframe.style = 'position: fixed; bottom: 20px; right: 20px; width: 400px; height: 600px; border: none; z-index: 9999; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);';
-  iframe.title = 'Keka Support Chat';
-  document.body.appendChild(iframe);
-});
-</script>
+ALLOWED_EMBED_DOMAINS=kekarehabservices.com,www.kekarehabservices.com,newsite.com
 ```
+Then redeploy.
+
+### Issue 5: "Connection Failed" Error
+
+1. Check the service is live: `https://keka-chatbot-production.up.railway.app/api/health`
+   should return `{"status":"ok","timestamp":"..."}`
+2. Check the Railway dashboard for deployment status and logs
 
 ---
 
-## Mobile Responsiveness
+## How It Works
 
-### Default Behavior
+`embed.js` is a small script (a few KB) served by the chatbot backend. It:
 
-The iframe is fixed-size (400×600px), which works on tablets but may be too large on phones.
+1. Adds a small transparent iframe in the bottom-right corner, sized to fit only the chat bubble
+2. Grows the iframe to the panel size (400×650, or full-screen on phones) when the visitor opens the chat
+3. Shrinks it back to the bubble when they close it
+4. Listens for clicks on `#keka-chat` links / `data-keka-chat` elements and tells the chat to open
 
-### Recommended Mobile Optimization
-
-Add this code for better mobile experience:
-
-```html
-<style>
-  #keka-chatbot-iframe {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 400px;
-    height: 600px;
-    border: none;
-    z-index: 9999;
-    border-radius: 16px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-  }
-
-  /* Mobile: Smaller widget */
-  @media (max-width: 768px) {
-    #keka-chatbot-iframe {
-      width: 90vw;
-      max-width: 350px;
-      height: 500px;
-      bottom: 10px;
-      right: 10px;
-    }
-  }
-
-  /* Small phones: Even smaller */
-  @media (max-width: 480px) {
-    #keka-chatbot-iframe {
-      width: calc(100vw - 20px);
-      height: 450px;
-      bottom: 10px;
-      right: 10px;
-    }
-  }
-</style>
-
-<iframe
-  id="keka-chatbot-iframe"
-  src="https://keka-chatbot-production.up.railway.app"
-  title="Keka Support Chat"
-  loading="lazy">
-</iframe>
-```
-
-### Testing Mobile Display
-
-**Method 1: Browser Dev Tools**
-1. Press F12 to open Developer Tools
-2. Click the device toggle icon (or Ctrl+Shift+M)
-3. Select different device sizes (iPhone, iPad, etc.)
-4. Test chatbot appearance and functionality
-
-**Method 2: Real Device Testing**
-1. Open your website on your phone
-2. Verify chatbot doesn't cover critical content
-3. Test all interactions (buttons, input, scrolling)
+The chat starts a new conversation (and counts a session in analytics) only when it's opened. Page views where nobody opens the chat aren't counted.
 
 ---
 
 ## Security & Privacy
 
-### Why iframe is Secure
+1. **Isolation:** the chat UI still runs inside an iframe on the chatbot's own domain
+   - It can't read WordPress cookies, session data, or page content
+   - What visitors type stays inside the iframe and is never shared with the WordPress page
+2. **Minimal messages:** the only messages exchanged between the page and the chat are "open" and "opened/closed". They carry no user data.
+3. **Embedding allowlist:** CSP `frame-ancestors` limits which sites can embed the chat
+4. **HIPAA safeguards:** PHI detection, privacy-preserving logging (hashed IPs, no raw input)
 
-The iframe approach provides several security benefits:
+### If Your WordPress Site Has a Strict CSP
 
-1. **Isolation**: The chatbot runs in a separate browsing context
-   - Cannot access WordPress cookies or session data
-   - Cannot read or modify WordPress page content
-   - Cannot execute scripts on the parent page
-
-2. **CORS Protection**: Backend enforces Cross-Origin Resource Sharing
-   - Only specified domains can make API requests
-   - Prevents unauthorized data access
-
-3. **No Direct Database Access**: WordPress database is completely isolated from the chatbot
-
-4. **HIPAA Compliance**: The chatbot is designed with HIPAA requirements in mind
-   - PHI detection prevents sensitive information submission
-   - Privacy-preserving logging (hashed IPs, no raw input)
-   - No long-term storage of user messages
-
-### Content Security Policy (CSP)
-
-If your WordPress site has strict CSP headers, you may need to allow the iframe:
-
-Add to your `.htaccess` or security plugin:
+Allow the script and the frame:
 ```
-Content-Security-Policy: frame-src 'self' https://keka-chatbot-production.up.railway.app;
+Content-Security-Policy: script-src 'self' https://keka-chatbot-production.up.railway.app; frame-src 'self' https://keka-chatbot-production.up.railway.app;
 ```
 
-Or using a plugin like "HTTP Headers" by Dimitar Ivanov:
-1. Install and activate "HTTP Headers"
-2. Go to **Settings > HTTP Headers**
-3. Add header: `Content-Security-Policy`
-4. Value: `frame-src 'self' https://keka-chatbot-production.up.railway.app`
+### HTTPS
 
-### SSL/HTTPS Considerations
-
-**Important**: The chatbot uses HTTPS (`https://keka-chatbot-production.up.railway.app`).
-
-If your WordPress site uses HTTP (not HTTPS), modern browsers will block the iframe (mixed content error).
-
-**Solution**: Ensure your WordPress site uses HTTPS. Use a plugin like "Really Simple SSL" to enable HTTPS.
+Your WordPress site must use HTTPS, or browsers will block the chatbot (mixed content). Use a plugin like "Really Simple SSL" if needed.
 
 ---
 
-## Performance Considerations
-
-### Impact on Page Load Speed
-
-**Good News**: The iframe loads independently and won't block your page rendering.
-
-**Optimization Tips**:
-
-1. **Use `loading="lazy"`** (already included in examples above)
-   - Delays iframe load until user scrolls near it
-   - Improves initial page load time
-
-2. **Defer Loading Until User Interaction**
-   - Only load chatbot when user clicks a trigger button
-   - Advanced implementation (requires custom JavaScript)
-
-3. **Monitor Performance**
-   - Use Google PageSpeed Insights
-   - Use GTmetrix to check impact
-   - The iframe typically adds 50-100KB to page weight
-
-### Caching Compatibility
-
-The chatbot works with all major WordPress caching plugins:
-- ✅ WP Super Cache
-- ✅ W3 Total Cache
-- ✅ WP Rocket
-- ✅ LiteSpeed Cache
-- ✅ Cloudflare
-
-The iframe is static HTML and will be cached normally.
-
----
-
-## Next Steps
-
-1. **Choose Your Method**: Pick the embedding method that best fits your needs
-2. **Add the Code**: Follow the step-by-step instructions
-3. **Test Thoroughly**: Use the testing checklist above
-4. **Customize** (Optional): Adjust position, size, or mobile behavior
-5. **Monitor**: Check analytics for chatbot usage (weekly email reports)
-
-## Need Help?
-
-- **Technical Issues**: Check the [Debugging Guide](./DEBUGGING.md)
-- **Customization**: See [Architecture Documentation](./ARCHITECTURE.md)
-- **Security Questions**: Review [Security Guidelines](./CLAUDE.md#critical-knowledge-hipaa--security)
-
----
-
-**Last Updated**: 2024-02-16
-**Chatbot Version**: 1.0.0
+**Last Updated**: 2026-10-19
 **Production URL**: https://keka-chatbot-production.up.railway.app
