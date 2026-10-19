@@ -22,28 +22,6 @@ function addNavigationButtons(buttons: Button[] = [], sessionData: any = {}): Bu
   ];
 }
 
-// Helper to add bot response to chat transcript and return updated response
-function addBotResponseToTranscript(response: BotResponse, chatTranscript: any[]): BotResponse {
-  // Add bot's response to transcript
-  const updatedTranscript = [
-    ...chatTranscript,
-    {
-      sender: 'bot' as const,
-      text: response.text,
-      timestamp: new Date().toISOString(),
-    },
-  ];
-
-  // Include transcript in session_data
-  return {
-    ...response,
-    session_data: {
-      ...response.session_data,
-      chat_transcript: updatedTranscript,
-    },
-  };
-}
-
 // Restore state response when user navigates back
 // This function reconstructs the appropriate question/UI for a given state
 function restoreStateResponse(sessionData: any): BotResponse {

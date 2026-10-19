@@ -41,7 +41,6 @@ Quick, focused guidance so an AI coder can be productive immediately.
 
 7) Integration points & external services
 - Email: AWS SES (`AWS_REGION`, `SES_FROM_EMAIL`) — backend uses `@aws-sdk/client-ses`.
-- SMS: AWS SNS (optional) via `@aws-sdk/client-sns`.
 - Postgres: `pg` client referenced; DB URL comes from `DATABASE_URL` in env (Railway sets this in prod).
 
 8) When making changes: quick checklist
