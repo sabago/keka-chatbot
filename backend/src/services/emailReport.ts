@@ -2,6 +2,19 @@ import { getWeeklyMetrics } from './analytics';
 import { logger } from '../utils/logger';
 import { SendEmailCommand, SESClient } from '@aws-sdk/client-ses';
 import { getPool } from '../db/init';
+import { FAQ_CATEGORIES } from './faq';
+import {
+  callout,
+  dataTable,
+  detailRows,
+  EMAIL_TIME_ZONE,
+  metricTiles,
+  paragraph,
+  parseEmailList,
+  renderEmail,
+  sectionHeading,
+  serviceTypeLabel,
+} from '../utils/emailFormat';
 
 // Initialize SES client
 let sesClient: SESClient | null = null;
@@ -49,6 +62,19 @@ function formatDuration(seconds: number): string {
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = Math.round(seconds % 60);
   return `${minutes}m ${remainingSeconds}s`;
+}
+
+/**
+ * Readable FAQ category and question text for an analytics row
+ * (falls back to the stored ids if the FAQ has since been removed)
+ */
+function faqLabels(categoryId?: string, questionId?: string): [string, string] {
+  const category = categoryId ? FAQ_CATEGORIES[categoryId] : undefined;
+  const question = category?.questions.find((q) => q.id === questionId);
+  return [
+    category?.label || categoryId || 'Uncategorized',
+    question?.question || questionId || 'Unknown',
+  ];
 }
 
 /**
@@ -219,10 +245,12 @@ async function generateWeeklyReportHTML(): Promise<string> {
     const dateRange = `${startDate.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
+      timeZone: EMAIL_TIME_ZONE,
     })} - ${endDate.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
+      timeZone: EMAIL_TIME_ZONE,
     })}`;
 
     // Get concurrent session stats
@@ -236,6 +264,8 @@ async function generateWeeklyReportHTML(): Promise<string> {
           hour: 'numeric',
           minute: '2-digit',
           hour12: true,
+          timeZone: EMAIL_TIME_ZONE,
+          timeZoneName: 'short',
         })
       : 'N/A';
 
@@ -245,325 +275,134 @@ async function generateWeeklyReportHTML(): Promise<string> {
       ? `${busiestHour}:00 - ${(busiestHour + 1) % 24}:00`
       : 'N/A';
 
-    // Calculate previous week metrics for comparison (if needed)
-    // For now, we'll just show current week metrics
+    const { conversion_metrics, session_metrics, popular_faqs, intake_metrics } = metrics;
 
-    const html = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      line-height: 1.6;
-      color: #333;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
+    // Usage insight shown under the concurrent usage figures
+    let usageInsight = '';
+    if (concurrentStats.peak_concurrent > 10) {
+      usageInsight = callout(
+        `Peak usage reached ${concurrentStats.peak_concurrent} concurrent visitors this week.`,
+        { label: 'High engagement:' }
+      );
+    } else if (concurrentStats.peak_concurrent > 0 && busiestHour !== null) {
+      usageInsight = callout(
+        `Average concurrent usage was ${concurrentStats.avg_concurrent.toFixed(1)} visitors. Engagement is highest between ${busiestHourFormatted}.`,
+        { label: 'Insight:' }
+      );
     }
-    h1 {
-      color: #0066cc;
-      border-bottom: 3px solid #0066cc;
-      padding-bottom: 10px;
-    }
-    h2 {
-      color: #0066cc;
-      margin-top: 30px;
-      font-size: 18px;
-    }
-    .metric-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      margin: 20px 0;
-    }
-    .metric-card {
-      background: #f5f5f5;
-      padding: 15px;
-      border-radius: 8px;
-      border-left: 4px solid #0066cc;
-    }
-    .metric-value {
-      font-size: 32px;
-      font-weight: bold;
-      color: #0066cc;
-      margin: 5px 0;
-    }
-    .metric-label {
-      font-size: 14px;
-      color: #666;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .metric-change {
-      font-size: 12px;
-      color: #28a745;
-      font-weight: bold;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 20px 0;
-    }
-    th, td {
-      padding: 12px;
-      text-align: left;
-      border-bottom: 1px solid #ddd;
-    }
-    th {
-      background-color: #0066cc;
-      color: white;
-      font-weight: bold;
-    }
-    tr:hover {
-      background-color: #f5f5f5;
-    }
-    .alert {
-      background-color: #fff3cd;
-      border-left: 4px solid #ffc107;
-      padding: 15px;
-      margin: 20px 0;
-      border-radius: 4px;
-    }
-    .success {
-      background-color: #d4edda;
-      border-left: 4px solid #28a745;
-      padding: 15px;
-      margin: 20px 0;
-      border-radius: 4px;
-    }
-    .footer {
-      margin-top: 40px;
-      padding-top: 20px;
-      border-top: 2px solid #ddd;
-      font-size: 12px;
-      color: #666;
-    }
-  </style>
-</head>
-<body>
-  <h1>=� Keka Chatbot Weekly Report</h1>
-  <p><strong>Period:</strong> ${dateRange}</p>
 
-  <h2>=� OVERVIEW</h2>
-  <div class="metric-grid">
-    <div class="metric-card">
-      <div class="metric-label">Sessions</div>
-      <div class="metric-value">${formatNumber(metrics.conversion_metrics.total_sessions)}</div>
-    </div>
-    <div class="metric-card">
-      <div class="metric-label">Handoff Requests</div>
-      <div class="metric-value">${formatNumber(metrics.conversion_metrics.handoff_requests)}</div>
-    </div>
-    <div class="metric-card">
-      <div class="metric-label">Conversion Rate</div>
-      <div class="metric-value">${formatPercent(metrics.conversion_metrics.conversion_rate)}</div>
-    </div>
-    <div class="metric-card">
-      <div class="metric-label">Avg Session Duration</div>
-      <div class="metric-value">${formatDuration(metrics.session_metrics.avg_duration_seconds)}</div>
-    </div>
-  </div>
+    const abandonment = intake_metrics.filter((i) => i.common_abandonment_step);
+    const needsReview = metrics.phi_warnings_count > 5 || metrics.errors_count > 10;
 
+    const content = [
+      sectionHeading('Overview'),
+      metricTiles([
+        { label: 'Sessions', value: formatNumber(conversion_metrics.total_sessions) },
+        { label: 'Handoff requests', value: formatNumber(conversion_metrics.handoff_requests) },
+        { label: 'Conversion rate', value: formatPercent(conversion_metrics.conversion_rate) },
+        { label: 'Avg session', value: formatDuration(session_metrics.avg_duration_seconds) },
+      ]),
 
-  <h2>👥 CONCURRENT USAGE</h2>
-  <div class="metric-grid">
-    <div class="metric-card">
-      <div class="metric-label">Peak Concurrent Users</div>
-      <div class="metric-value">${formatNumber(concurrentStats.peak_concurrent)}</div>
-      <p style="font-size: 12px; color: #666; margin-top: 5px;">
-        ${concurrentStats.peak_time ? `on ${peakTimeFormatted}` : 'No data'}
-      </p>
-    </div>
-    <div class="metric-card">
-      <div class="metric-label">Avg Concurrent Users</div>
-      <div class="metric-value">${concurrentStats.avg_concurrent.toFixed(1)}</div>
-      <p style="font-size: 12px; color: #666; margin-top: 5px;">
-        Throughout the week
-      </p>
-    </div>
-    <div class="metric-card">
-      <div class="metric-label">Busiest Hour</div>
-      <div class="metric-value">${busiestHour !== null ? `${busiestHour}:00` : 'N/A'}</div>
-      <p style="font-size: 12px; color: #666; margin-top: 5px;">
-        ${busiestHourFormatted}
-      </p>
-    </div>
-  </div>
-  ${
-    concurrentStats.peak_concurrent > 10
-      ? `
-  <div class="success">
-    <strong>📊 High Engagement:</strong> Peak concurrent usage of ${concurrentStats.peak_concurrent} users indicates strong chatbot adoption!
-  </div>
-  `
-      : concurrentStats.peak_concurrent > 0 && busiestHour !== null
-      ? `
-  <div style="background-color: #e7f3ff; border-left: 4px solid #0066cc; padding: 15px; margin: 20px 0; border-radius: 4px;">
-    <strong>💡 Insight:</strong> Average concurrent usage is ${concurrentStats.avg_concurrent.toFixed(1)} users. Consider promoting the chatbot during ${busiestHourFormatted} when engagement is highest.
-  </div>
-  `
-      : ''
-  }
+      sectionHeading('Concurrent usage'),
+      metricTiles([
+        {
+          label: 'Peak concurrent',
+          value: formatNumber(concurrentStats.peak_concurrent),
+          note: concurrentStats.peak_time ? peakTimeFormatted : 'No data',
+        },
+        {
+          label: 'Average concurrent',
+          value: concurrentStats.avg_concurrent.toFixed(1),
+          note: 'Across the week',
+        },
+        {
+          label: 'Busiest hour',
+          value: busiestHour !== null ? `${busiestHour}:00` : 'N/A',
+          note: busiestHour !== null ? busiestHourFormatted : 'No data',
+        },
+      ]),
+      usageInsight,
 
-  <h2><� SERVICE DISTRIBUTION</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Service Type</th>
-        <th>Requests</th>
-        <th>Percentage</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${metrics.conversion_metrics.by_service_type
-        .map(
-          (service) => `
-        <tr>
-          <td>${service.service_type || 'Not specified'}</td>
-          <td>${formatNumber(service.count)}</td>
-          <td>${formatPercent(service.percentage)}</td>
-        </tr>
-      `
-        )
-        .join('')}
-    </tbody>
-  </table>
+      sectionHeading('Requests by service'),
+      conversion_metrics.by_service_type.length > 0
+        ? dataTable(
+            ['Service type', 'Requests', 'Share'],
+            conversion_metrics.by_service_type.map((service) => [
+              serviceTypeLabel(service.service_type),
+              formatNumber(service.count),
+              formatPercent(service.percentage),
+            ])
+          )
+        : paragraph('No requests this period.'),
 
-  <h2>S TOP 5 MOST VIEWED FAQs</h2>
-  ${
-    metrics.popular_faqs.length > 0
-      ? `
-  <table>
-    <thead>
-      <tr>
-        <th>Category</th>
-        <th>Question ID</th>
-        <th>Views</th>
-        <th>Resolution Rate</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${metrics.popular_faqs
-        .map(
-          (faq) => `
-        <tr>
-          <td>${faq.category}</td>
-          <td>${faq.question_id}</td>
-          <td>${formatNumber(faq.view_count)}</td>
-          <td>${faq.resolution_rate ? formatPercent(faq.resolution_rate) : 'N/A'}</td>
-        </tr>
-      `
-        )
-        .join('')}
-    </tbody>
-  </table>
-  `
-      : '<p>No FAQ data available for this period.</p>'
-  }
+      sectionHeading('Most viewed FAQs'),
+      popular_faqs.length > 0
+        ? dataTable(
+            ['Category', 'Question', 'Views', 'Resolved'],
+            popular_faqs.map((faq) => [
+              ...faqLabels(faq.category, faq.question_id),
+              formatNumber(faq.view_count),
+              faq.resolution_rate ? formatPercent(faq.resolution_rate) : 'N/A',
+            ]),
+            ['left', 'left', 'right', 'right']
+          )
+        : paragraph('No FAQ data available for this period.'),
 
-  <h2> INTAKE FLOW PERFORMANCE</h2>
-  ${
-    metrics.intake_metrics.length > 0
-      ? `
-  <table>
-    <thead>
-      <tr>
-        <th>Service Type</th>
-        <th>Started</th>
-        <th>Completed</th>
-        <th>Completion Rate</th>
-        <th>Avg Duration</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${metrics.intake_metrics
-        .map(
-          (intake) => `
-        <tr>
-          <td>${intake.service_type}</td>
-          <td>${formatNumber(intake.started_count)}</td>
-          <td>${formatNumber(intake.completed_count)}</td>
-          <td>${formatPercent(intake.completion_rate)}</td>
-          <td>${formatDuration(intake.avg_duration_seconds)}</td>
-        </tr>
-      `
-        )
-        .join('')}
-    </tbody>
-  </table>
-  ${
-    metrics.intake_metrics.some((i) => i.common_abandonment_step)
-      ? `
-  <div class="alert">
-    <strong>� Common Drop-off Points:</strong>
-    <ul>
-      ${metrics.intake_metrics
-        .filter((i) => i.common_abandonment_step)
-        .map(
-          (i) => `
-        <li>${i.service_type}: ${i.common_abandonment_step}</li>
-      `
-        )
-        .join('')}
-    </ul>
-  </div>
-  `
-      : ''
-  }
-  `
-      : '<p>No intake flow data available for this period.</p>'
-  }
+      sectionHeading('Intake flow performance'),
+      intake_metrics.length > 0
+        ? dataTable(
+            ['Service type', 'Started', 'Completed', 'Completion', 'Avg time'],
+            intake_metrics.map((intake) => [
+              serviceTypeLabel(intake.service_type),
+              formatNumber(intake.started_count),
+              formatNumber(intake.completed_count),
+              formatPercent(intake.completion_rate),
+              formatDuration(intake.avg_duration_seconds),
+            ])
+          )
+        : paragraph('No intake flow data available for this period.'),
+      abandonment.length > 0
+        ? callout(
+            abandonment.map((i) => `${serviceTypeLabel(i.service_type)}: ${i.common_abandonment_step}`).join('; '),
+            { label: 'Most common drop-off points:', tone: 'warning' }
+          )
+        : '',
 
-  <h2>= SECURITY & COMPLIANCE</h2>
-  <div class="metric-grid">
-    <div class="metric-card">
-      <div class="metric-label">PHI Warnings Triggered</div>
-      <div class="metric-value">${formatNumber(metrics.phi_warnings_count)}</div>
-      <p style="font-size: 12px; color: #666; margin-top: 5px;">
-        ${
-          metrics.phi_warnings_count === 0
-            ? ' No PHI detected'
-            : '� Review logs for details'
-        }
-      </p>
-    </div>
-    <div class="metric-card">
-      <div class="metric-label">Errors</div>
-      <div class="metric-value">${formatNumber(metrics.errors_count)}</div>
-      <p style="font-size: 12px; color: #666; margin-top: 5px;">
-        ${
-          metrics.errors_count < 5
-            ? ' Normal error rate'
-            : '� Higher than normal'
-        }
-      </p>
-    </div>
-  </div>
+      sectionHeading('Security and compliance'),
+      detailRows([
+        [
+          'PHI warnings triggered',
+          `${formatNumber(metrics.phi_warnings_count)} (${
+            metrics.phi_warnings_count === 0 ? 'none detected' : 'review logs for details'
+          })`,
+        ],
+        [
+          'Errors',
+          `${formatNumber(metrics.errors_count)} (${
+            metrics.errors_count < 5 ? 'within normal range' : 'higher than normal'
+          })`,
+        ],
+      ]),
+      needsReview
+        ? callout('Please review the system logs for PHI warnings and errors.', {
+            label: 'Action required:',
+            tone: 'warning',
+          })
+        : '',
+    ].join('');
 
-  ${
-    metrics.phi_warnings_count > 5 || metrics.errors_count > 10
-      ? `
-  <div class="alert">
-    <strong>� Action Required:</strong> Review system logs for PHI warnings and errors.
-  </div>
-  `
-      : ''
-  }
-
-  <div class="footer">
-    <p>
-      This report was automatically generated by the Keka Chatbot Analytics System.<br>
-      For questions or issues, please contact your system administrator.
-    </p>
-    <p>
-      <strong>View detailed analytics:</strong> Log into your Railway dashboard and query the analytics_events table.
-    </p>
-  </div>
-</body>
-</html>
-    `;
+    const html = renderEmail({
+      title: 'Chatbot Weekly Report',
+      subtitle: dateRange,
+      preheader: `${formatNumber(conversion_metrics.total_sessions)} sessions and ${formatNumber(
+        conversion_metrics.handoff_requests
+      )} handoff requests, ${dateRange}`,
+      content,
+      footerLines: [
+        'This report is generated automatically by the Keka chatbot every week.',
+        'Detailed analytics are available in the analytics_events table on Railway.',
+      ],
+    });
 
     return html;
   } catch (error) {
@@ -573,13 +412,21 @@ async function generateWeeklyReportHTML(): Promise<string> {
 }
 
 /**
+ * Recipients for the weekly report: WEEKLY_REPORT_RECIPIENT as a
+ * comma-separated list (trimmed and de-duplicated).
+ */
+export function getReportRecipients(): string[] {
+  return parseEmailList(process.env.WEEKLY_REPORT_RECIPIENT);
+}
+
+/**
  * Send weekly report email
  */
 export async function sendWeeklyReport(): Promise<boolean> {
   try {
-    const recipient = process.env.WEEKLY_REPORT_RECIPIENT;
+    const recipients = getReportRecipients();
 
-    if (!recipient) {
+    if (recipients.length === 0) {
       logger.warn('weekly_report_no_recipient', {
         message: 'WEEKLY_REPORT_RECIPIENT environment variable not set',
       });
@@ -595,7 +442,8 @@ export async function sendWeeklyReport(): Promise<boolean> {
     }
 
     logger.info('weekly_report_generation_started', {
-      recipient,
+      recipient_count: recipients.length,
+      recipients: recipients.join(', '),
     });
 
     const htmlContent = await generateWeeklyReportHTML();
@@ -604,11 +452,16 @@ export async function sendWeeklyReport(): Promise<boolean> {
     const sesClient = getSESClient();
     const command = new SendEmailCommand({
       Destination: {
-        ToAddresses: [recipient],
+        ToAddresses: recipients,
       },
       Message: {
         Subject: {
-          Data: `=� Keka Chatbot Weekly Report - ${new Date().toLocaleDateString()}`,
+          Data: `Keka Chatbot Weekly Report - ${new Date().toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            timeZone: EMAIL_TIME_ZONE,
+          })}`,
           Charset: 'UTF-8',
         },
         Body: {
@@ -624,7 +477,8 @@ export async function sendWeeklyReport(): Promise<boolean> {
     await sesClient.send(command);
 
     logger.info('weekly_report_sent', {
-      recipient,
+      recipient_count: recipients.length,
+      recipients: recipients.join(', '),
       timestamp: new Date().toISOString(),
     });
 
