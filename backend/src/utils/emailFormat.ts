@@ -25,7 +25,7 @@ export const SERVICE_TYPE_LABELS: Record<string, string> = {
   'patient_intake': 'Patient / Client Intake',
   'accreditation_consulting': 'Accreditation & Consulting Support',
   'staffing_employment': 'Staffing & Employment',
-  'general_inquiry': 'General Contact Request',
+  'general_inquiry': 'General Inquiry',
 };
 
 /** Human-readable label for a service type id (falls back to the id) */

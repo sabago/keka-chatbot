@@ -330,7 +330,14 @@ a HANDOFF_EMAIL address? what's each
   backend/src/services/email.ts
 
   Contains: User's contact info,
-  service type requested, form data
+  service type requested, and the
+  non-medical answers (e.g. care for
+  self/loved one, care setting).
+  Never contains health information
+  or the chat transcript (HIPAA):
+  the chatbot does not collect
+  diagnosis, DOB, insurance, etc.
+  Staff gather those by phone.
 
   ---
   Visual Summary
