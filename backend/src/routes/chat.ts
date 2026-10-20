@@ -8,15 +8,14 @@ const router = Router();
 
 router.post('/chat', async (req: Request, res: Response) => {
   try {
-    // DEBUG: Log every request to /api/chat
-    logger.info('chat_endpoint_hit', {
-      message_preview: req.body.message?.substring(0, 50),
-      session_id: req.body.session_id,
-      state: req.body.session_data?.state,
-    });
-
     // Validate request
     const validatedRequest = ChatRequestSchema.parse(req.body);
+
+    // Older frontend builds sent the full chat transcript inside session_data.
+    // Drop it so text a visitor typed is never processed or echoed back.
+    if (validatedRequest.session_data) {
+      delete validatedRequest.session_data.chat_transcript;
+    }
 
     // Get IP hash for logging
     const ip = (req.headers['x-forwarded-for'] as string || req.socket.remoteAddress || 'unknown');
@@ -32,7 +31,8 @@ router.post('/chat', async (req: Request, res: Response) => {
   } catch (error) {
     if (error instanceof ZodError) {
       logger.warn('validation_error', {
-        errors: error.errors.map(e => ({ path: e.path.join('.'), message: e.message })),
+        // Path and code only: some zod messages repeat the submitted value.
+        errors: error.errors.map(e => ({ path: e.path.join('.'), code: e.code })),
       });
       res.status(400).json({ error: 'Invalid request format' });
     } else {

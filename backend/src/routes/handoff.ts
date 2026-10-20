@@ -33,7 +33,8 @@ router.post('/handoff/request', async (req: Request, res: Response) => {
   } catch (error) {
     if (error instanceof ZodError) {
       logger.warn('handoff_validation_error', {
-        errors: error.errors.map(e => ({ path: e.path.join('.'), message: e.message })),
+        // Path and code only: some zod messages repeat the submitted value.
+        errors: error.errors.map(e => ({ path: e.path.join('.'), code: e.code })),
       });
       res.status(400).json({ error: 'Invalid request format' });
     } else {

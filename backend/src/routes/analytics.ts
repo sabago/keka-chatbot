@@ -1,4 +1,5 @@
-import { Router, Request, Response } from 'express';
+import crypto from 'crypto';
+import { Router, Request, Response, NextFunction } from 'express';
 import { logger } from '../utils/logger';
 import {
   getWeeklyMetrics,
@@ -11,6 +12,31 @@ import {
 } from '../services/analytics';
 
 const router = Router();
+
+// The app never calls these routes (the weekly report job uses the services
+// directly), and they can send email, so they fail closed: they require
+// `Authorization: Bearer <ANALYTICS_API_KEY>` and are off when it isn't set.
+function requireAnalyticsKey(req: Request, res: Response, next: NextFunction) {
+  const expected = process.env.ANALYTICS_API_KEY;
+  if (!expected) {
+    return res.status(404).json({ error: 'Not found' });
+  }
+
+  const header = req.headers.authorization || '';
+  const provided = header.startsWith('Bearer ') ? header.slice(7) : '';
+
+  // Compare digests so the check takes the same time whatever the input length.
+  const digest = (value: string) => crypto.createHash('sha256').update(value).digest();
+  if (!crypto.timingSafeEqual(digest(provided), digest(expected))) {
+    const ip = (req.headers['x-forwarded-for'] as string || req.socket.remoteAddress || 'unknown');
+    logger.warn('analytics_auth_failed', { ip_hash: logger.hashIP(ip), path: req.path });
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  next();
+}
+
+router.use('/analytics', requireAnalyticsKey);
 
 /**
  * GET /api/analytics/weekly
