@@ -22,17 +22,7 @@ export const BotResponseSchema = z.object({
   next_state: z.enum([
     'awaiting_user_choice',
     'awaiting_contact',
-    // Patient intake flow states
-    'awaiting_dob',
-    'awaiting_gender',
-    'awaiting_address',
-    'awaiting_emergency_contact',
-    'awaiting_medical_info',
-    'awaiting_assistive_devices',
-    'awaiting_services',
-    'awaiting_mobility',
-    'awaiting_referral',
-    'awaiting_insurance',
+    // Patient intake flow states (no health information is collected)
     'awaiting_care_for',
     'awaiting_setting',
     // Accreditation/Consulting flow states

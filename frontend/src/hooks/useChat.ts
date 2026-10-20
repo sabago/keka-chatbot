@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { sendChatMessage } from '../api';
 import type { ChatMessage } from '../types';
 
@@ -13,25 +13,15 @@ function generateSessionId(): string {
   });
 }
 
-// Storage key for input values
-const INPUT_VALUES_STORAGE_KEY = 'keka-chat-input-values';
+// Values a visitor typed that were persisted by older builds. They are kept
+// in memory only now, so remove any copy left in the browser.
+const LEGACY_INPUT_VALUES_STORAGE_KEY = 'keka-chat-input-values';
 
-// Helper functions for input value persistence
-function saveInputValuesToStorage(values: Record<number, string>): void {
+function clearLegacyInputValues(): void {
   try {
-    sessionStorage.setItem(INPUT_VALUES_STORAGE_KEY, JSON.stringify(values));
-  } catch (error) {
-    console.warn('Failed to save input values to sessionStorage:', error);
-  }
-}
-
-function loadInputValuesFromStorage(): Record<number, string> {
-  try {
-    const stored = sessionStorage.getItem(INPUT_VALUES_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : {};
-  } catch (error) {
-    console.warn('Failed to load input values from sessionStorage:', error);
-    return {};
+    sessionStorage.removeItem(LEGACY_INPUT_VALUES_STORAGE_KEY);
+  } catch {
+    // Storage can be unavailable (privacy mode, blocked third-party storage).
   }
 }
 
@@ -43,15 +33,13 @@ export function useChat() {
   const [sessionData, setSessionData] = useState<Record<string, any>>({});
   const [messageHistory, setMessageHistory] = useState<ChatMessage[][]>([]);
 
-  // Store input values by message index for back button functionality
-  const [inputValues, setInputValues] = useState<Record<number, string>>(() =>
-    loadInputValuesFromStorage()
-  );
-
-  // Save input values to sessionStorage whenever they change
-  useEffect(() => {
-    saveInputValuesToStorage(inputValues);
-  }, [inputValues]);
+  // Store input values by message index for back button functionality.
+  // In memory only: the conversation itself does not survive a reload, and
+  // typed values must not be left in browser storage.
+  const [inputValues, setInputValues] = useState<Record<number, string>>(() => {
+    clearLegacyInputValues();
+    return {};
+  });
 
   const sendMessage = useCallback(
     async (message: string, hideUserMessage = false, displayText?: string) => {
@@ -73,20 +61,8 @@ export function useChat() {
       setIsLoading(true);
 
       try {
-        // Prepare chat transcript for backend (convert messages to simple format)
-        const chatTranscript = messages.map((msg) => ({
-          sender: msg.sender,
-          text: msg.text,
-          timestamp: msg.timestamp.toISOString(),
-        }));
-
-        // Include transcript in session_data
-        const updatedSessionData = {
-          ...sessionData,
-          chat_transcript: chatTranscript,
-        };
-
-        const response = await sendChatMessage(message, sessionId, updatedSessionData);
+        // The chat transcript is never sent: visitors can type health details into it.
+        const response = await sendChatMessage(message, sessionId, sessionData);
 
         // Add bot response
         const botMessage: ChatMessage = {

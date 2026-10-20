@@ -408,7 +408,7 @@ export async function handleChatMessage(request: ChatRequest, ipHash: string): P
       logger.info('state_route_awaiting_submit_confirmation', {
         session_id: request.session_id,
         service_type: session_data?.service_type,
-        message: message,
+        message_length: message.length,
       });
       return await handleAwaitingSubmitConfirmation(message, session_data, ipHash, request.session_id);
 
@@ -993,7 +993,7 @@ async function handleAwaitingNotesAccreditation(message: string, sessionData: an
   // DEBUG: Log that we reached this handler
   logger.info('handleAwaitingNotesAccreditation_called', {
     session_id: sessionId,
-    message_choice: choice,
+    notes_skipped: choice === 'skip',
     service_type: sessionData.service_type,
   });
 
@@ -1266,7 +1266,7 @@ async function handleAwaitingSubmitConfirmation(message: string, sessionData: an
   // DEBUG: Log that we reached this handler
   logger.info('handleAwaitingSubmitConfirmation_called', {
     session_id: sessionId,
-    choice: choice,
+    submitted: choice === 'submit_intake',
     service_type: sessionData.service_type,
     state: sessionData.state,
   });
